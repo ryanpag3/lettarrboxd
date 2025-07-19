@@ -48,7 +48,6 @@ function findNewMovies(currentMovies: Movie[], previousMovies: Movie[]): Movie[]
 
 async function writeMoviesToFile(movies: Movie[]): Promise<void> {
   try {
-    // Ensure DATA_DIR exists
     if (!fs.existsSync(env.DATA_DIR)) {
       fs.mkdirSync(env.DATA_DIR, { recursive: true });
     }
@@ -148,10 +147,8 @@ function startScheduledMonitoring(): void {
   console.log(`Starting scheduled monitoring every ${intervalMinutes} minutes`);
   console.log(`Next check will be at: ${new Date(Date.now() + intervalMs).toISOString()}`);
 
-  // Run initial check
   processWatchlist();
 
-  // Schedule recurring checks
   setInterval(() => {
     console.log(`\n--- Scheduled check triggered (interval: ${intervalMinutes} minutes) ---`);
     processWatchlist();

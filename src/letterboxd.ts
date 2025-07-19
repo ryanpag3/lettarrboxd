@@ -17,7 +17,6 @@ function extractMovieUrlsFromHtml(html: string): string[] {
         const $container = $(element);
         const $filmPoster = $container.find('.film-poster');
         
-        // Get the URL from data-target-link attribute
         const url = $filmPoster.attr('data-target-link') || '';
         
         if (url) {
@@ -33,7 +32,6 @@ async function getTmdbIdFromMoviePage(url: string): Promise<string | null> {
         const response = await axios.get(url);
         const $ = cheerio.load(response.data);
         
-        // Look for TMDB ID in various possible locations
         const tmdbLink = $('a[href*="themoviedb.org/movie/"]').attr('href');
         if (tmdbLink) {
             const match = tmdbLink.match(/\/movie\/(\d+)/);
@@ -42,7 +40,6 @@ async function getTmdbIdFromMoviePage(url: string): Promise<string | null> {
             }
         }
         
-        // Alternative: look for data attributes that might contain TMDB ID
         const tmdbId = $('[data-tmdb-id]').attr('data-tmdb-id');
         if (tmdbId) {
             return tmdbId;
@@ -82,7 +79,7 @@ async function getAllWatchlistUrls(): Promise<string[]> {
                 }
             }
             
-            // Add delay between page requests
+            // So we don't get in trouble
             await new Promise(resolve => setTimeout(resolve, 1000));
         } catch (error) {
             console.error(`Error fetching page ${page}:`, error);
@@ -98,7 +95,7 @@ export async function getWatchlistMovies(): Promise<Movie[]> {
     
     console.log('Total movies found across all pages:', urls.length);
     
-    // Limit to first 5 movies in development mode
+    // We limit to the first 5 movies in dev mode
     const urlsToProcess = env.NODE_ENV === 'development' ? urls.slice(0, 5) : urls;
     
     if (env.NODE_ENV === 'development') {
@@ -116,7 +113,7 @@ export async function getWatchlistMovies(): Promise<Movie[]> {
             tmdbId: tmdbId || undefined
         });
         
-        // Add a small delay to be respectful to the server
+        // Add a small delay so we don't get in trouble
         await new Promise(resolve => setTimeout(resolve, 500));
     }
     
