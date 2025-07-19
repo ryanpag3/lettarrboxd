@@ -7,7 +7,9 @@ const envSchema = z.object({
   DATA_DIR: z.string(),
   RADARR_API_URL: z.string(),
   RADARR_API_KEY: z.string(),
-  RADARR_QUALITY_PROFILE: z.string()
+  RADARR_QUALITY_PROFILE: z.string(),
+  RADARR_MINIMUM_AVAILABILITY: z.string().default('released'),
+  CHECK_INTERVAL_MINUTES: z.string().default('10').transform(Number).pipe(z.number().min(10))
 });
 
 export type Env = z.infer<typeof envSchema>;

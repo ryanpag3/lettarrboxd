@@ -141,7 +141,7 @@ export async function addMovie(tmdbId: string, movieData: any): Promise<any> {
             qualityProfileId: qualityProfileId,
             rootFolderPath: rootFolderPath,
             tmdbId: parseInt(tmdbId),
-            minimumAvailability: 'released',
+            minimumAvailability: env.RADARR_MINIMUM_AVAILABILITY,
             monitored: true,
             tags: tags,
             addOptions: {
