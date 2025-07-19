@@ -1,1 +1,168 @@
-More details coming soon!
+# Watchlistarr
+
+Automatically sync your Letterboxd watchlist to Radarr for seamless movie management.
+
+## Overview
+
+Watchlistarr is an application that monitors your Letterboxd watchlist and automatically adds new movies to Radarr. It runs continuously, checking for updates at configurable intervals and only processing new additions to avoid duplicate API calls.
+
+## Quick Start
+
+### Docker (Recommended)
+
+```bash
+docker run -d \
+  --name watchlistarr \
+  -e LETTERBOXD_USERNAME=your_username \
+  -e RADARR_API_URL=http://your-radarr:7878 \
+  -e RADARR_API_KEY=your_api_key \
+  -e RADARR_QUALITY_PROFILE="HD-1080p" \
+  -v /path/to/data:/data \
+  ryanpage/watchlistarr:latest
+```
+
+### Docker Compose
+
+```yaml
+version: '3.8'
+services:
+  watchlistarr:
+    image: ryanpage/watchlistarr:latest
+    container_name: watchlistarr
+    environment:
+      - LETTERBOXD_USERNAME=your_username
+      - RADARR_API_URL=http://radarr:7878
+      - RADARR_API_KEY=your_api_key
+      - RADARR_QUALITY_PROFILE=HD-1080p
+      - CHECK_INTERVAL_MINUTES=60
+    volumes:
+      - ./data:/data
+    restart: unless-stopped
+```
+
+## Configuration
+
+### Required Environment Variables
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `LETTERBOXD_USERNAME` | Your Letterboxd username | `moviefan123` |
+| `RADARR_API_URL` | Radarr base URL | `http://radarr:7878` |
+| `RADARR_API_KEY` | Radarr API key | `abc123...` |
+| `RADARR_QUALITY_PROFILE` | Quality profile name in Radarr | `HD-1080p` |
+
+### Optional Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `CHECK_INTERVAL_MINUTES` | `10` | How often to check for new movies (minimum 10) |
+| `RADARR_MINIMUM_AVAILABILITY` | `released` | When movie becomes available (`announced`, `inCinemas`, `released`) |
+| `DATA_DIR` | `/data` | Directory for storing application data |
+| `NODE_ENV` | `development` | Environment mode (`development`, `production`) |
+| `LOG_LEVEL` | `info` | Logging level (`error`, `warn`, `info`, `debug`) |
+
+## Development
+
+### Prerequisites
+
+- Node.js 20+
+- Yarn package manager
+
+### Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/ryanpag3/watchlistarr.git
+cd watchlistarr
+
+# Install dependencies
+yarn install
+
+# Create environment file
+cp .env.example .env
+# Edit .env with your configuration
+
+# Run in development mode
+yarn start:dev
+```
+
+### Development Commands
+
+```bash
+yarn start:dev     # Run with auto-reload
+yarn tsc          # Compile TypeScript
+yarn tsc --noEmit # Type check only
+```
+
+### Development Mode
+
+When `NODE_ENV=development`, the application:
+- Only processes the first 5 movies (for faster testing)
+- Uses more verbose logging
+- Includes additional debug information
+
+## Project Structure
+
+```
+src/
+├── index.ts          # Main application and scheduler
+├── env.ts            # Environment variable validation
+├── letterboxd.ts     # Letterboxd scraping and TMDB extraction
+└── radarr.ts         # Radarr API integration
+
+.github/workflows/
+└── build-docker.yml  # Automated Docker builds
+
+Dockerfile            # Production container configuration
+```
+
+## API Rate Limiting
+
+The application includes built-in rate limiting to be respectful to external services:
+- 1 second delay between Letterboxd page requests
+- 1 second delay between Radarr API calls
+- 500ms delay between TMDB ID extractions
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## Troubleshooting
+
+### Common Issues
+
+**Movies not being added**
+- Verify your Radarr API key and URL are correct
+- Check that the quality profile name matches exactly (case-sensitive)
+- Ensure your Letterboxd profile is public
+
+**High CPU/Memory usage**
+- Increase `CHECK_INTERVAL_MINUTES` to reduce frequency
+- Check logs for errors causing retries
+
+**Docker container won't start**
+- Verify all required environment variables are set
+- Check container logs: `docker logs watchlistarr`
+
+### Logs
+
+Application logs include:
+- Watchlist check start/completion times
+- Number of new movies found
+- Individual movie processing status
+- Radarr API responses
+- Error details with stack traces
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- [Letterboxd](https://letterboxd.com/) for providing an excellent movie tracking platform
+- [Radarr](https://radarr.video/) for powerful movie management
+- [The Movie Database (TMDB)](https://www.themoviedb.org/) for movie metadata
