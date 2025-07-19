@@ -58,7 +58,7 @@ services:
 | `CHECK_INTERVAL_MINUTES` | `10` | How often to check for new movies (minimum 10) |
 | `RADARR_MINIMUM_AVAILABILITY` | `released` | When movie becomes available (`announced`, `inCinemas`, `released`) |
 | `DATA_DIR` | `/data` | Directory for storing application data |
-| `NODE_ENV` | `development` | Environment mode (`development`, `production`) |
+| `NODE_ENV` | `production` | Environment mode (`development`, `production`) |
 | `LOG_LEVEL` | `info` | Logging level (`error`, `warn`, `info`, `debug`) |
 
 ## Development
