@@ -4,120 +4,110 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Watchlistarr is a TypeScript Node.js application that automatically syncs Letterboxd watchlist movies to Radarr. It monitors a user's Letterboxd watchlist for new additions and automatically adds them to Radarr for download management.
+Watchlistarr is a TypeScript Node.js application that automatically syncs Letterboxd watchlist movies to Radarr. It continuously monitors a user's Letterboxd watchlist for new additions and automatically adds them to Radarr for download management.
 
 ## Commands
 
 ### Development
 - `yarn install` - Install dependencies
+- `yarn start` - Run the application using ts-node
 - `yarn start:dev` - Run with auto-reload during development using nodemon
-- `yarn ts-node src/index.ts` - Run the main TypeScript file directly
-
-### TypeScript
-- `yarn tsc` - Compile TypeScript (outputs to current directory based on tsconfig.json)
+- `yarn build` - Compile TypeScript to JavaScript
 - `yarn tsc --noEmit` - Type check without emitting files
 
 ### Docker
 - `docker build -t watchlistarr .` - Build Docker image
 - `docker run -d --env-file .env -v ./data:/data watchlistarr` - Run container
 
-## Environment Variables
+## Environment Configuration
 
-Required environment variables (create `.env` file):
+The application uses Zod for strict environment variable validation in `src/env.ts`. All environment variables are validated at startup and the application will exit with detailed error messages if validation fails.
 
-```bash
-# Letterboxd Configuration
-LETTERBOXD_USERNAME=your_username
+Required variables:
+- `LETTERBOXD_USERNAME` - Letterboxd username for watchlist scraping
+- `RADARR_API_URL` - Base URL of Radarr instance  
+- `RADARR_API_KEY` - Radarr API key
+- `RADARR_QUALITY_PROFILE` - Quality profile name (case-sensitive)
 
-# Radarr Configuration
-RADARR_API_URL=http://your-radarr:7878
-RADARR_API_KEY=your_api_key
-RADARR_QUALITY_PROFILE=HD-1080p
-RADARR_MINIMUM_AVAILABILITY=released
+Key validation rules:
+- `CHECK_INTERVAL_MINUTES` enforces minimum 10 minutes
+- Environment variables are transformed and validated using Zod schemas
+- The app exits early with clear error messages for invalid configuration
 
-# Application Configuration
-DATA_DIR=/data
-CHECK_INTERVAL_MINUTES=60
-NODE_ENV=production
-LOG_LEVEL=info
+## Architecture Overview
+
+### Core Application Flow
+The application follows a scheduled monitoring pattern:
+1. **Scheduler** (`startScheduledMonitoring`) runs `processWatchlist()` at configured intervals
+2. **Incremental Processing** - Only new movies (not in previous `movies.json`) are processed
+3. **Rate Limiting** - Built-in delays between API calls to respect external services
+4. **Persistent State** - Tracks processed movies in `DATA_DIR/movies.json` to avoid reprocessing
+
+### Module Separation
+- **`src/index.ts`** - Main orchestration, scheduling, and file I/O operations
+- **`src/letterboxd.ts`** - Web scraping and TMDB ID extraction logic
+- **`src/radarr.ts`** - Radarr API integration and movie management
+- **`src/env.ts`** - Environment validation and configuration management
+
+### Key Architectural Patterns
+
+**State Management**: The application maintains state through a `movies.json` file containing:
+```typescript
+interface MoviesData {
+  timestamp: string;
+  queryDate: string; 
+  totalMovies: number;
+  movies: Movie[];
+}
 ```
 
-## Project Structure
+**Error Handling**: Each module handles errors gracefully without crashing the scheduler. Network failures and API errors are logged but don't stop the monitoring process.
 
-```
-src/
-├── index.ts          # Main application entry point with scheduler
-├── env.ts            # Environment variable validation using Zod
-├── letterboxd.ts     # Letterboxd watchlist scraping and TMDB ID extraction
-└── radarr.ts         # Radarr API integration for movie management
+**Development Mode**: When `NODE_ENV=development`, the application limits processing to the first 5 movies for faster testing cycles.
 
-.github/workflows/
-└── build-docker.yml  # GitHub Actions workflow for Docker builds
+**Radarr Integration**: Movies are added with:
+- Specified quality profile from environment
+- "letterboxd-watchlist" tag for organization
+- Automatic monitoring and search enabled
+- Configurable minimum availability settings
 
-Dockerfile            # Multi-stage Docker build configuration
-.dockerignore         # Docker build context exclusions
-```
+### Web Scraping Strategy
+Letterboxd scraping is implemented with:
+- **Multi-page support** - Automatically handles paginated watchlists
+- **TMDB ID extraction** - Visits individual movie pages to extract TMDB identifiers
+- **Rate limiting** - 1 second delays between page requests, 500ms between TMDB extractions
+- **Graceful pagination** - Detects end of pages using CSS selectors
 
-## Key Dependencies
+### Function Organization
+The codebase is organized into small, focused functions:
+- `processWatchlist()` - High-level orchestration (19 lines)
+- `addMovieToRadarr(movie)` - Individual movie processing
+- `processNewMovies(movies)` - Batch processing with delays
+- `getAllWatchlistUrls()` - Pagination handling
+- `getTmdbIdFromMoviePage(url)` - TMDB ID extraction
 
-- **axios**: HTTP client for API requests and web scraping
-- **cheerio**: Server-side jQuery for HTML parsing
-- **zod**: TypeScript-first schema validation for environment variables
-- **dotenv**: Environment variable loading from .env files
-- **nodemon**: Development auto-reload tool
-- **ts-node**: TypeScript execution environment
-- **typescript**: TypeScript compiler
+## Development Notes
 
-## Architecture Notes
+### TypeScript Configuration
+- Strict mode enabled with comprehensive type checking
+- Uses ts-node for direct TypeScript execution
+- All environment variables are strictly typed through Zod inference
 
-### Core Features
-- **Scheduled Monitoring**: Runs continuously checking for new watchlist movies every N minutes
-- **Incremental Processing**: Only processes new movies since last run (tracked in movies.json)
-- **Development Mode**: Limits processing to first 5 movies when NODE_ENV=development
-- **Multi-page Support**: Handles paginated Letterboxd watchlists
-- **TMDB Integration**: Extracts TMDB IDs from Letterboxd movie pages
-- **Radarr Integration**: Adds movies with quality profiles, tags, and monitoring
-- **Docker Support**: Production-ready containerization with multi-architecture builds
+### Docker Multi-Stage Build
+The Dockerfile uses a production-optimized approach:
+- Alpine Linux base for minimal size
+- Non-root user for security
+- Health checks included
+- Multi-architecture support (AMD64/ARM64)
 
-### Key Functions
+### Rate Limiting Implementation
+Built-in delays prevent overwhelming external services:
+- 1000ms between Letterboxd page requests
+- 1000ms between Radarr API calls  
+- 500ms between TMDB ID extractions
 
-#### `src/index.ts`
-- **`processWatchlist()`**: Main orchestration function for watchlist processing
-- **`addMovieToRadarr(movie)`**: Handles individual movie addition to Radarr
-- **`startScheduledMonitoring()`**: Sets up recurring watchlist checks
-
-#### `src/letterboxd.ts`
-- **`getWatchlistMovies()`**: Fetches all movies from Letterboxd watchlist
-- **`getAllWatchlistUrls()`**: Handles pagination across all watchlist pages
-- **`getTmdbIdFromMoviePage(url)`**: Extracts TMDB ID from individual movie pages
-
-#### `src/radarr.ts`
-- **`addMovie(tmdbId, movieData)`**: Adds movie to Radarr with quality profile and tags
-- **`checkMovieInRadarr(tmdbId)`**: Checks if movie already exists in Radarr
-- **`getOrCreateTag(tagName)`**: Creates "letterboxd-watchlist" tag for organization
-
-### Error Handling
-- Graceful handling of network failures and API errors
-- Rate limiting with delays between requests to be respectful to services
-- Comprehensive logging for debugging and monitoring
-
-### Security
-- Environment variable validation with minimum value constraints
-- Non-root Docker user for container security
-- No hardcoded credentials or sensitive data
-
-## Docker Deployment
-
-The application is built as a Docker image and published to Docker Hub at `ryanpage/watchlistarr`.
-
-### GitHub Actions
-- Automated builds on push to main/develop branches
-- Multi-platform support (AMD64/ARM64)
-- Security scanning with Trivy
-- Semantic versioning support for releases
-
-### Container Features
-- Alpine Linux base for minimal image size
-- Non-root user execution for security
-- Health checks for container monitoring
-- Volume mount for persistent data storage
+### Error Recovery
+The application is designed to handle transient failures:
+- Individual movie processing failures don't stop the batch
+- Network timeouts are caught and logged
+- Scheduler continues running even if individual checks fail
