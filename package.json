@@ -6,9 +6,19 @@
   "author": "Ryan Page <ryanapage@gmail.com>",
   "license": "MIT",
   "private": true,
+  "scripts": {
+    "start:dev": "nodemon src/index.ts"
+  },
   "dependencies": {
+    "axios": "^1.10.0",
+    "cheerio": "^1.1.0",
+    "dotenv": "^17.2.0",
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "zod": "^4.0.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.15"
   }
 }
