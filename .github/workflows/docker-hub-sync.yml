@@ -20,3 +20,4 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           repository: ryanpage/watchlistarr
           readme-filepath: ./README.md
+          short-description: ${{ github.event.repository.description }}
