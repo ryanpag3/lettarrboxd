@@ -113,6 +113,11 @@ export async function getOrCreateTag(tagName: string): Promise<number | null> {
 
 export async function addMovie(tmdbId: string, movieData: any): Promise<any> {
     try {
+        if (!movieData) {
+            console.error(`No movie data provided for TMDB ID: ${tmdbId}`);
+            return null;
+        }
+        
         console.log(`Adding movie to Radarr: ${movieData.title} (TMDB: ${tmdbId})`);
         
         const qualityProfileId = await getQualityProfileId(env.RADARR_QUALITY_PROFILE);

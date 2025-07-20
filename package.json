@@ -12,7 +12,8 @@
     "build": "tsc",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "test:integration": "jest --testPathPatterns=integration"
   },
   "dependencies": {
     "axios": "^1.10.0",
@@ -24,8 +25,10 @@
     "zod": "^4.0.5"
   },
   "devDependencies": {
+    "@types/express": "^5.0.3",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.0.15",
+    "express": "^5.1.0",
     "jest": "^30.0.4",
     "ts-jest": "^29.4.0"
   }
