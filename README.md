@@ -19,22 +19,7 @@ docker run -d \
   -e RADARR_QUALITY_PROFILE="HD-1080p" \
   ryanpage/watchlistarr:latest
 ```
-
-### Docker Compose
-
-```yaml
-services:
-  watchlistarr:
-    image: ryanpage/watchlistarr:latest
-    container_name: watchlistarr
-    environment:
-      - LETTERBOXD_USERNAME=your_username
-      - RADARR_API_URL=http://radarr:7878
-      - RADARR_API_KEY=your_api_key
-      - RADARR_QUALITY_PROFILE=HD-1080p
-      - CHECK_INTERVAL_MINUTES=60
-    restart: unless-stopped
-```
+See [docker-compose.yaml](./docker-compose.yaml) for complete example.
 
 ## Configuration
 
