@@ -1,0 +1,22 @@
+name: Sync README to Docker Hub
+
+on:
+  push:
+    branches: [main, master]
+    paths: ['README.md']
+  workflow_dispatch:
+
+jobs:
+  update-docker-hub:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Update Docker Hub Description
+        uses: peter-evans/dockerhub-description@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: ryanpage/watchlistarr
+          readme-filepath: ./README.md
