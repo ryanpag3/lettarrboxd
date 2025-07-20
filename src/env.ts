@@ -10,11 +10,11 @@ const envSchema = z.object({
   RADARR_QUALITY_PROFILE: z.string(),
   RADARR_MINIMUM_AVAILABILITY: z.string().default('released'),
   CHECK_INTERVAL_MINUTES: z.string().default('10').transform(Number).pipe(z.number().min(10)),
-  TAKE_AMOUNT: z.string().optional().transform(val => val ? Number(val) : undefined).pipe(z.number().positive().optional()),
-  TAKE_STRATEGY: z.enum(['oldest', 'newest']).optional()
+  LETTERBOXD_TAKE_AMOUNT: z.string().optional().transform(val => val ? Number(val) : undefined).pipe(z.number().positive().optional()),
+  LETTERBOXD_TAKE_STRATEGY: z.enum(['oldest', 'newest']).optional()
 }).refine(data => {
-  const hasTakeAmount = data.TAKE_AMOUNT !== undefined;
-  const hasTakeStrategy = data.TAKE_STRATEGY !== undefined;
+  const hasTakeAmount = data.LETTERBOXD_TAKE_AMOUNT !== undefined;
+  const hasTakeStrategy = data.LETTERBOXD_TAKE_STRATEGY !== undefined;
   
   // If one is specified, both must be specified
   if (hasTakeAmount && !hasTakeStrategy) {
@@ -27,8 +27,8 @@ const envSchema = z.object({
   
   return true;
 }, {
-  message: "When using movie limiting, both TAKE_AMOUNT and TAKE_STRATEGY must be specified",
-  path: ["TAKE_AMOUNT", "TAKE_STRATEGY"]
+  message: "When using movie limiting, both LETTERBOXD_TAKE_AMOUNT and LETTERBOXD_TAKE_STRATEGY must be specified",
+  path: ["LETTERBOXD_TAKE_AMOUNT", "LETTERBOXD_TAKE_STRATEGY"]
 });
 
 export type Env = z.infer<typeof envSchema>;

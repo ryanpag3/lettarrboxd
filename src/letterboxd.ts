@@ -98,13 +98,13 @@ function applyMovieLimiting(urls: string[]): string[] {
     }
     
     // Apply movie limiting based on new strategy
-    if (env.TAKE_AMOUNT && env.TAKE_STRATEGY) {
-        console.log(`Limiting to ${env.TAKE_STRATEGY} ${env.TAKE_AMOUNT} movies`);
+    if (env.LETTERBOXD_TAKE_AMOUNT && env.LETTERBOXD_TAKE_STRATEGY) {
+        console.log(`Limiting to ${env.LETTERBOXD_TAKE_STRATEGY} ${env.LETTERBOXD_TAKE_AMOUNT} movies`);
         
-        if (env.TAKE_STRATEGY === 'newest') {
-            return urls.slice(0, env.TAKE_AMOUNT);
-        } else if (env.TAKE_STRATEGY === 'oldest') {
-            return urls.slice(-env.TAKE_AMOUNT);
+        if (env.LETTERBOXD_TAKE_STRATEGY === 'newest') {
+            return urls.slice(0, env.LETTERBOXD_TAKE_AMOUNT);
+        } else if (env.LETTERBOXD_TAKE_STRATEGY === 'oldest') {
+            return urls.slice(-env.LETTERBOXD_TAKE_AMOUNT);
         }
     }
     

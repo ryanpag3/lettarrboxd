@@ -1,0 +1,24 @@
+services:
+  watchlistarr:
+    image: ryanpage/watchlistarr:latest
+    container_name: watchlistarr
+    environment:
+      # Required variables
+      - LETTERBOXD_USERNAME=your_username
+      - RADARR_API_URL=http://radarr:7878
+      - RADARR_API_KEY=your_api_key
+      - RADARR_QUALITY_PROFILE=HD-1080p
+      
+      # Optional variables with defaults
+      - NODE_ENV=production
+      - LOG_LEVEL=info
+      - CHECK_INTERVAL_MINUTES=60
+      - RADARR_MINIMUM_AVAILABILITY=released
+      - DATA_DIR=/data
+      
+      # Optional movie limiting (both required if using)
+      # - LETTERBOXD_TAKE_AMOUNT=10
+      # - LETTERBOXD_TAKE_STRATEGY=newest
+    volumes:
+      - ./data:/data
+    restart: unless-stopped

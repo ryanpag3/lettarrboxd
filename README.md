@@ -4,11 +4,11 @@ Automatically sync your Letterboxd watchlist to Radarr for seamless movie manage
 
 ## Overview
 
-Watchlistarr is an application that monitors your Letterboxd watchlist and automatically adds new movies to Radarr. It runs continuously, checking for updates at configurable intervals and only processing new additions to avoid duplicate API calls.
+Watchlistarr is an application that monitors your Letterboxd watchlist and automatically pushes new movies to Radarr. It runs continuously, checking for updates at configurable intervals and only processing new additions to avoid duplicate API calls.
 
 ## Quick Start
 
-### Docker (Recommended)
+### Docker
 
 ```bash
 docker run -d \
@@ -19,23 +19,7 @@ docker run -d \
   -e RADARR_QUALITY_PROFILE="HD-1080p" \
   ryanpage/watchlistarr:latest
 ```
-
-### Docker Compose
-
-```yaml
-version: '3.8'
-services:
-  watchlistarr:
-    image: ryanpage/watchlistarr:latest
-    container_name: watchlistarr
-    environment:
-      - LETTERBOXD_USERNAME=your_username
-      - RADARR_API_URL=http://radarr:7878
-      - RADARR_API_KEY=your_api_key
-      - RADARR_QUALITY_PROFILE=HD-1080p
-      - CHECK_INTERVAL_MINUTES=60
-    restart: unless-stopped
-```
+See [docker-compose.yaml](./docker-compose.yaml) for complete example.
 
 ## Configuration
 
@@ -54,11 +38,9 @@ services:
 |----------|---------|-------------|
 | `CHECK_INTERVAL_MINUTES` | `10` | How often to check for new movies (minimum 10) |
 | `RADARR_MINIMUM_AVAILABILITY` | `released` | When movie becomes available (`announced`, `inCinemas`, `released`) |
-| `DATA_DIR` | `/data` | Directory for storing application data |
-| `NODE_ENV` | `production` | Environment mode (`development`, `production`) |
-| `LOG_LEVEL` | `info` | Logging level (`error`, `warn`, `info`, `debug`) |
-| `TAKE_AMOUNT` | - | Number of movies to sync (requires `TAKE_STRATEGY`) |
-| `TAKE_STRATEGY` | - | Movie selection strategy: `newest` or `oldest` (requires `TAKE_AMOUNT`) |
+| `LETTERBOXD_TAKE_AMOUNT` | - | Number of movies to sync (requires `LETTERBOXD_TAKE_STRATEGY`) |
+| `LETTERBOXD_TAKE_STRATEGY` | - | Movie selection strategy: `newest` or `oldest` (requires `LETTERBOXD_TAKE_AMOUNT`) |
+| `DATA_DIR` | `/data` | Directory for storing application data. You generally do not need to worry about this. |
 
 ## Development
 
@@ -116,10 +98,6 @@ When `NODE_ENV=development`, the application:
 - Verify your Radarr API key and URL are correct
 - Check that the quality profile name matches exactly (case-sensitive)
 - Ensure your Letterboxd profile is public
-
-**High CPU/Memory usage**
-- Increase `CHECK_INTERVAL_MINUTES` to reduce frequency
-- Check logs for errors causing retries
 
 **Docker container won't start**
 - Verify all required environment variables are set
