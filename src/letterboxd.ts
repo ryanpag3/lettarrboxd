@@ -90,17 +90,33 @@ async function getAllWatchlistUrls(): Promise<string[]> {
     return allUrls;
 }
 
+function applyMovieLimiting(urls: string[]): string[] {
+    // Development mode takes precedence
+    if (env.NODE_ENV === 'development') {
+        console.log(`Development mode: processing only first 5 movies`);
+        return urls.slice(0, 5);
+    }
+    
+    // Apply movie limiting based on new strategy
+    if (env.TAKE_AMOUNT && env.TAKE_STRATEGY) {
+        console.log(`Limiting to ${env.TAKE_STRATEGY} ${env.TAKE_AMOUNT} movies`);
+        
+        if (env.TAKE_STRATEGY === 'newest') {
+            return urls.slice(0, env.TAKE_AMOUNT);
+        } else if (env.TAKE_STRATEGY === 'oldest') {
+            return urls.slice(-env.TAKE_AMOUNT);
+        }
+    }
+    
+    return urls;
+}
+
 export async function getWatchlistMovies(): Promise<Movie[]> {
     const urls = await getAllWatchlistUrls();
     
     console.log('Total movies found across all pages:', urls.length);
     
-    // We limit to the first 5 movies in dev mode
-    const urlsToProcess = env.NODE_ENV === 'development' ? urls.slice(0, 5) : urls;
-    
-    if (env.NODE_ENV === 'development') {
-        console.log(`Development mode: processing only first ${urlsToProcess.length} movies`);
-    }
+    const urlsToProcess = applyMovieLimiting(urls);
     
     const movies: Movie[] = [];
     

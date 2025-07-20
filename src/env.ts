@@ -9,7 +9,26 @@ const envSchema = z.object({
   RADARR_API_KEY: z.string(),
   RADARR_QUALITY_PROFILE: z.string(),
   RADARR_MINIMUM_AVAILABILITY: z.string().default('released'),
-  CHECK_INTERVAL_MINUTES: z.string().default('10').transform(Number).pipe(z.number().min(10))
+  CHECK_INTERVAL_MINUTES: z.string().default('10').transform(Number).pipe(z.number().min(10)),
+  TAKE_AMOUNT: z.string().optional().transform(val => val ? Number(val) : undefined).pipe(z.number().positive().optional()),
+  TAKE_STRATEGY: z.enum(['oldest', 'newest']).optional()
+}).refine(data => {
+  const hasTakeAmount = data.TAKE_AMOUNT !== undefined;
+  const hasTakeStrategy = data.TAKE_STRATEGY !== undefined;
+  
+  // If one is specified, both must be specified
+  if (hasTakeAmount && !hasTakeStrategy) {
+    return false;
+  }
+  
+  if (hasTakeStrategy && !hasTakeAmount) {
+    return false;
+  }
+  
+  return true;
+}, {
+  message: "When using movie limiting, both TAKE_AMOUNT and TAKE_STRATEGY must be specified",
+  path: ["TAKE_AMOUNT", "TAKE_STRATEGY"]
 });
 
 export type Env = z.infer<typeof envSchema>;
