@@ -69,7 +69,7 @@ describe('env validation', () => {
       expect(env.CHECK_INTERVAL_MINUTES).toBe(30);
     });
 
-    it('should validate LETTERBOXD_LETTERBOXD_TAKE_AMOUNT and LETTERBOXD_LETTERBOXD_TAKE_STRATEGY when both provided', () => {
+    it('should validate LETTERBOXD_TAKE_AMOUNT and LETTERBOXD_TAKE_STRATEGY when both provided', () => {
       process.env = {
         ...originalEnv,
         LETTERBOXD_USERNAME: 'testuser',
@@ -77,14 +77,14 @@ describe('env validation', () => {
         RADARR_API_URL: 'http://localhost:7878',
         RADARR_API_KEY: 'test-key',
         RADARR_QUALITY_PROFILE: 'HD-1080p',
-        LETTERBOXD_LETTERBOXD_TAKE_AMOUNT: '10',
-        LETTERBOXD_LETTERBOXD_TAKE_STRATEGY: 'newest'
+        LETTERBOXD_TAKE_AMOUNT: '10',
+        LETTERBOXD_TAKE_STRATEGY: 'newest'
       };
 
       const env = require('./env').default;
       
-      expect(env.LETTERBOXD_LETTERBOXD_TAKE_AMOUNT).toBe(10);
-      expect(env.LETTERBOXD_LETTERBOXD_TAKE_STRATEGY).toBe('newest');
+      expect(env.LETTERBOXD_TAKE_AMOUNT).toBe(10);
+      expect(env.LETTERBOXD_TAKE_STRATEGY).toBe('newest');
     });
 
     it('should handle oldest strategy', () => {
