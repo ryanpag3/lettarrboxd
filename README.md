@@ -57,6 +57,8 @@ services:
 | `DATA_DIR` | `/data` | Directory for storing application data |
 | `NODE_ENV` | `production` | Environment mode (`development`, `production`) |
 | `LOG_LEVEL` | `info` | Logging level (`error`, `warn`, `info`, `debug`) |
+| `TAKE_AMOUNT` | - | Number of movies to sync (requires `TAKE_STRATEGY`) |
+| `TAKE_STRATEGY` | - | Movie selection strategy: `newest` or `oldest` (requires `TAKE_AMOUNT`) |
 
 ## Development
 
