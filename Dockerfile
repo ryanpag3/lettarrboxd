@@ -1,5 +1,5 @@
-# Use Node.js LTS Alpine image for smaller size
-FROM node:20-alpine
+# Build stage
+FROM node:20-alpine AS builder
 
 # Set working directory
 WORKDIR /app
@@ -7,14 +7,29 @@ WORKDIR /app
 # Copy package files
 COPY package.json yarn.lock ./
 
-# Install dependencies
-RUN yarn install --frozen-lockfile --production
+# Install all dependencies (including devDependencies for build)
+RUN yarn install --frozen-lockfile
 
 # Copy source code
 COPY . .
 
 # Build TypeScript
 RUN yarn tsc
+
+# Production stage
+FROM node:20-alpine AS production
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package.json yarn.lock ./
+
+# Install only production dependencies
+RUN yarn install --frozen-lockfile --production && yarn cache clean
+
+# Copy built JavaScript from builder stage
+COPY --from=builder /app/dist ./dist
 
 # Create data directory
 RUN mkdir -p /data
@@ -41,4 +56,4 @@ HEALTHCHECK --interval=5m --timeout=30s --start-period=5s --retries=3 \
   CMD node -e "console.log('Health check passed')" || exit 1
 
 # Start the application
-CMD ["node", "src/index.js"]
+CMD ["node", "dist/index.js"]
