@@ -17,7 +17,6 @@ docker run -d \
   -e RADARR_API_URL=http://your-radarr:7878 \
   -e RADARR_API_KEY=your_api_key \
   -e RADARR_QUALITY_PROFILE="HD-1080p" \
-  -v /path/to/data:/data \
   ryanpage/watchlistarr:latest
 ```
 
@@ -35,8 +34,6 @@ services:
       - RADARR_API_KEY=your_api_key
       - RADARR_QUALITY_PROFILE=HD-1080p
       - CHECK_INTERVAL_MINUTES=60
-    volumes:
-      - ./data:/data
     restart: unless-stopped
 ```
 
@@ -101,28 +98,6 @@ When `NODE_ENV=development`, the application:
 - Uses more verbose logging
 - Includes additional debug information
 
-## Project Structure
-
-```
-src/
-├── index.ts          # Main application and scheduler
-├── env.ts            # Environment variable validation
-├── letterboxd.ts     # Letterboxd scraping and TMDB extraction
-└── radarr.ts         # Radarr API integration
-
-.github/workflows/
-└── build-docker.yml  # Automated Docker builds
-
-Dockerfile            # Production container configuration
-```
-
-## API Rate Limiting
-
-The application includes built-in rate limiting to be respectful to external services:
-- 1 second delay between Letterboxd page requests
-- 1 second delay between Radarr API calls
-- 500ms delay between TMDB ID extractions
-
 ## Contributing
 
 1. Fork the repository
@@ -148,21 +123,6 @@ The application includes built-in rate limiting to be respectful to external ser
 - Verify all required environment variables are set
 - Check container logs: `docker logs watchlistarr`
 
-### Logs
-
-Application logs include:
-- Watchlist check start/completion times
-- Number of new movies found
-- Individual movie processing status
-- Radarr API responses
-- Error details with stack traces
-
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- [Letterboxd](https://letterboxd.com/) for providing an excellent movie tracking platform
-- [Radarr](https://radarr.video/) for powerful movie management
-- [The Movie Database (TMDB)](https://www.themoviedb.org/) for movie metadata
