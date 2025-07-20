@@ -155,7 +155,7 @@ function startScheduledMonitoring(): void {
   }, intervalMs);
 }
 
-async function main() {
+export async function main() {
   console.log('Watchlistarr starting...');
   console.log('Environment configuration:');
   console.log(`- Check interval: ${env.CHECK_INTERVAL_MINUTES} minutes`);
@@ -165,4 +165,9 @@ async function main() {
   startScheduledMonitoring();
 }
 
-main().catch(console.error);
+export { processWatchlist, startScheduledMonitoring };
+
+// Only run main if this file is executed directly
+if (require.main === module) {
+  main().catch(console.error);
+}
