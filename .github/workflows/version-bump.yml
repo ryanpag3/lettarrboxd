@@ -1,0 +1,132 @@
+name: Version Bump on Main Merge
+
+on:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  version-bump:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write
+      
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+          
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+        
+      - name: Configure Git
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+      - name: Get current version
+        id: current-version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+        
+      - name: Determine version bump type
+        id: version-bump
+        run: |
+          # Get the commit messages since last tag
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -z "$LAST_TAG" ]; then
+            COMMITS=$(git log --oneline)
+          else
+            COMMITS=$(git log ${LAST_TAG}..HEAD --oneline)
+          fi
+          
+          # Check for breaking changes (major version)
+          if echo "$COMMITS" | grep -qE "(BREAKING CHANGE|!:)"; then
+            echo "bump=major" >> $GITHUB_OUTPUT
+          # Check for features (minor version)
+          elif echo "$COMMITS" | grep -qE "(feat|feature)(\(.*\))?:"; then
+            echo "bump=minor" >> $GITHUB_OUTPUT
+          # Default to patch for any other changes
+          else
+            echo "bump=patch" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Bump version
+        id: new-version
+        run: |
+          CURRENT_VERSION="${{ steps.current-version.outputs.version }}"
+          BUMP_TYPE="${{ steps.version-bump.outputs.bump }}"
+          
+          # Parse current version
+          IFS='.' read -ra VERSION_PARTS <<< "$CURRENT_VERSION"
+          MAJOR=${VERSION_PARTS[0]}
+          MINOR=${VERSION_PARTS[1]}
+          PATCH=${VERSION_PARTS[2]}
+          
+          # Bump version based on type
+          case $BUMP_TYPE in
+            major)
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+              ;;
+            minor)
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              ;;
+            patch)
+              PATCH=$((PATCH + 1))
+              ;;
+          esac
+          
+          NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+          echo "version=${NEW_VERSION}" >> $GITHUB_OUTPUT
+          
+          # Update package.json
+          npm version $NEW_VERSION --no-git-tag-version
+          
+      - name: Update Dockerfile with new version
+        run: |
+          NEW_VERSION="${{ steps.new-version.outputs.version }}"
+          # Add version label to Dockerfile
+          if ! grep -q "LABEL version=" Dockerfile; then
+            sed -i '/FROM node:20-alpine AS production/a LABEL version="'$NEW_VERSION'"' Dockerfile
+          else
+            sed -i 's/LABEL version=".*"/LABEL version="'$NEW_VERSION'"/' Dockerfile
+          fi
+          
+      - name: Commit and tag version
+        run: |
+          NEW_VERSION="${{ steps.new-version.outputs.version }}"
+          git add package.json Dockerfile
+          git commit -m "chore: bump version to ${NEW_VERSION}"
+          git tag "v${NEW_VERSION}"
+          
+      - name: Push changes
+        run: |
+          git push origin main --tags
+          
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.new-version.outputs.version }}
+          release_name: Release v${{ steps.new-version.outputs.version }}
+          body: |
+            ## Changes in v${{ steps.new-version.outputs.version }}
+            
+            This release was automatically generated based on conventional commits.
+            
+            **Version bump type:** ${{ steps.version-bump.outputs.bump }}
+            **Previous version:** ${{ steps.current-version.outputs.version }}
+            **New version:** ${{ steps.new-version.outputs.version }}
+          draft: false
+          prerelease: false
