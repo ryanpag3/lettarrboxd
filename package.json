@@ -9,7 +9,10 @@
   "scripts": {
     "start": "ts-node src/index.ts",
     "start:dev": "nodemon src/index.ts",
-    "build": "tsc"
+    "build": "tsc",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "dependencies": {
     "axios": "^1.10.0",
@@ -21,6 +24,9 @@
     "zod": "^4.0.5"
   },
   "devDependencies": {
-    "@types/node": "^24.0.15"
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.0.15",
+    "jest": "^30.0.4",
+    "ts-jest": "^29.4.0"
   }
 }
