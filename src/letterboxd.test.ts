@@ -170,8 +170,8 @@ describe('letterboxd module', () => {
   describe('movie limiting functionality', () => {
     beforeEach(() => {
       // Reset environment for each test
-      delete process.env.TAKE_AMOUNT;
-      delete process.env.TAKE_STRATEGY;
+      delete process.env.LETTERBOXD_TAKE_AMOUNT;
+      delete process.env.LETTERBOXD_TAKE_STRATEGY;
       process.env.NODE_ENV = 'production';
     });
 
@@ -197,9 +197,9 @@ describe('letterboxd module', () => {
       expect(movies).toHaveLength(5);
     });
 
-    it('should limit to newest N movies when TAKE_STRATEGY=newest', async () => {
-      process.env.TAKE_AMOUNT = '3';
-      process.env.TAKE_STRATEGY = 'newest';
+    it('should limit to newest N movies when LETTERBOXD_TAKE_STRATEGY=newest', async () => {
+      process.env.LETTERBOXD_TAKE_AMOUNT = '3';
+      process.env.LETTERBOXD_TAKE_STRATEGY = 'newest';
       
       const mockHtml = Array.from({ length: 5 }, (_, i) => 
         `<div class="poster-container"><div class="film-poster" data-target-link="/film/movie-${i}/"></div></div>`
@@ -221,9 +221,9 @@ describe('letterboxd module', () => {
       expect(console.log).toHaveBeenCalledWith('Limiting to newest 3 movies');
     });
 
-    it('should limit to oldest N movies when TAKE_STRATEGY=oldest', async () => {
-      process.env.TAKE_AMOUNT = '2';
-      process.env.TAKE_STRATEGY = 'oldest';
+    it('should limit to oldest N movies when LETTERBOXD_TAKE_STRATEGY=oldest', async () => {
+      process.env.LETTERBOXD_TAKE_AMOUNT = '2';
+      process.env.LETTERBOXD_TAKE_STRATEGY = 'oldest';
       
       const mockHtml = Array.from({ length: 5 }, (_, i) => 
         `<div class="poster-container"><div class="film-poster" data-target-link="/film/movie-${i}/"></div></div>`

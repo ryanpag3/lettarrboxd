@@ -69,7 +69,7 @@ describe('env validation', () => {
       expect(env.CHECK_INTERVAL_MINUTES).toBe(30);
     });
 
-    it('should validate TAKE_AMOUNT and TAKE_STRATEGY when both provided', () => {
+    it('should validate LETTERBOXD_LETTERBOXD_TAKE_AMOUNT and LETTERBOXD_LETTERBOXD_TAKE_STRATEGY when both provided', () => {
       process.env = {
         ...originalEnv,
         LETTERBOXD_USERNAME: 'testuser',
@@ -77,14 +77,14 @@ describe('env validation', () => {
         RADARR_API_URL: 'http://localhost:7878',
         RADARR_API_KEY: 'test-key',
         RADARR_QUALITY_PROFILE: 'HD-1080p',
-        TAKE_AMOUNT: '10',
-        TAKE_STRATEGY: 'newest'
+        LETTERBOXD_LETTERBOXD_TAKE_AMOUNT: '10',
+        LETTERBOXD_LETTERBOXD_TAKE_STRATEGY: 'newest'
       };
 
       const env = require('./env').default;
       
-      expect(env.TAKE_AMOUNT).toBe(10);
-      expect(env.TAKE_STRATEGY).toBe('newest');
+      expect(env.LETTERBOXD_LETTERBOXD_TAKE_AMOUNT).toBe(10);
+      expect(env.LETTERBOXD_LETTERBOXD_TAKE_STRATEGY).toBe('newest');
     });
 
     it('should handle oldest strategy', () => {
@@ -95,17 +95,17 @@ describe('env validation', () => {
         RADARR_API_URL: 'http://localhost:7878',
         RADARR_API_KEY: 'test-key',
         RADARR_QUALITY_PROFILE: 'HD-1080p',
-        TAKE_AMOUNT: '5',
-        TAKE_STRATEGY: 'oldest'
+        LETTERBOXD_TAKE_AMOUNT: '5',
+        LETTERBOXD_TAKE_STRATEGY: 'oldest'
       };
 
       const env = require('./env').default;
       
-      expect(env.TAKE_AMOUNT).toBe(5);
-      expect(env.TAKE_STRATEGY).toBe('oldest');
+      expect(env.LETTERBOXD_TAKE_AMOUNT).toBe(5);
+      expect(env.LETTERBOXD_TAKE_STRATEGY).toBe('oldest');
     });
 
-    it('should allow missing TAKE_AMOUNT and TAKE_STRATEGY when both omitted', () => {
+    it('should allow missing LETTERBOXD_TAKE_AMOUNT and LETTERBOXD_TAKE_STRATEGY when both omitted', () => {
       process.env = {
         ...originalEnv,
         LETTERBOXD_USERNAME: 'testuser',
@@ -117,8 +117,8 @@ describe('env validation', () => {
 
       const env = require('./env').default;
       
-      expect(env.TAKE_AMOUNT).toBeUndefined();
-      expect(env.TAKE_STRATEGY).toBeUndefined();
+      expect(env.LETTERBOXD_TAKE_AMOUNT).toBeUndefined();
+      expect(env.LETTERBOXD_TAKE_STRATEGY).toBeUndefined();
     });
   });
 
@@ -263,7 +263,7 @@ describe('env validation', () => {
       expect(mockProcessExit).toHaveBeenCalledWith(1);
     });
 
-    it('should fail when TAKE_AMOUNT is not a positive number', () => {
+    it('should fail when LETTERBOXD_TAKE_AMOUNT is not a positive number', () => {
       process.env = {
         ...originalEnv,
         LETTERBOXD_USERNAME: 'testuser',
@@ -271,8 +271,8 @@ describe('env validation', () => {
         RADARR_API_URL: 'http://localhost:7878',
         RADARR_API_KEY: 'test-key',
         RADARR_QUALITY_PROFILE: 'HD-1080p',
-        TAKE_AMOUNT: '0',
-        TAKE_STRATEGY: 'newest'
+        LETTERBOXD_TAKE_AMOUNT: '0',
+        LETTERBOXD_TAKE_STRATEGY: 'newest'
       };
 
       expect(() => {
@@ -282,7 +282,7 @@ describe('env validation', () => {
       expect(mockProcessExit).toHaveBeenCalledWith(1);
     });
 
-    it('should fail when TAKE_STRATEGY is invalid', () => {
+    it('should fail when LETTERBOXD_TAKE_STRATEGY is invalid', () => {
       process.env = {
         ...originalEnv,
         LETTERBOXD_USERNAME: 'testuser',
@@ -290,8 +290,8 @@ describe('env validation', () => {
         RADARR_API_URL: 'http://localhost:7878',
         RADARR_API_KEY: 'test-key',
         RADARR_QUALITY_PROFILE: 'HD-1080p',
-        TAKE_AMOUNT: '10',
-        TAKE_STRATEGY: 'invalid'
+        LETTERBOXD_TAKE_AMOUNT: '10',
+        LETTERBOXD_TAKE_STRATEGY: 'invalid'
       };
 
       expect(() => {
@@ -301,7 +301,7 @@ describe('env validation', () => {
       expect(mockProcessExit).toHaveBeenCalledWith(1);
     });
 
-    it('should fail when TAKE_AMOUNT is specified without TAKE_STRATEGY', () => {
+    it('should fail when LETTERBOXD_TAKE_AMOUNT is specified without LETTERBOXD_TAKE_STRATEGY', () => {
       process.env = {
         ...originalEnv,
         LETTERBOXD_USERNAME: 'testuser',
@@ -309,7 +309,7 @@ describe('env validation', () => {
         RADARR_API_URL: 'http://localhost:7878',
         RADARR_API_KEY: 'test-key',
         RADARR_QUALITY_PROFILE: 'HD-1080p',
-        TAKE_AMOUNT: '10'
+        LETTERBOXD_TAKE_AMOUNT: '10'
       };
 
       expect(() => {
@@ -319,7 +319,7 @@ describe('env validation', () => {
       expect(mockProcessExit).toHaveBeenCalledWith(1);
     });
 
-    it('should fail when TAKE_STRATEGY is specified without TAKE_AMOUNT', () => {
+    it('should fail when LETTERBOXD_TAKE_STRATEGY is specified without LETTERBOXD_TAKE_AMOUNT', () => {
       process.env = {
         ...originalEnv,
         LETTERBOXD_USERNAME: 'testuser',
@@ -327,7 +327,7 @@ describe('env validation', () => {
         RADARR_API_URL: 'http://localhost:7878',
         RADARR_API_KEY: 'test-key',
         RADARR_QUALITY_PROFILE: 'HD-1080p',
-        TAKE_STRATEGY: 'newest'
+        LETTERBOXD_TAKE_STRATEGY: 'newest'
       };
 
       expect(() => {
@@ -368,7 +368,7 @@ describe('env validation', () => {
         RADARR_API_URL: 'http://localhost:7878',
         RADARR_API_KEY: 'test-key',
         RADARR_QUALITY_PROFILE: 'HD-1080p',
-        TAKE_AMOUNT: '10'
+        LETTERBOXD_TAKE_AMOUNT: '10'
       };
 
       expect(() => {
@@ -378,7 +378,7 @@ describe('env validation', () => {
       // Check that the custom error message is displayed
       const errorCalls = mockConsoleError.mock.calls;
       const hasMovieLimitingError = errorCalls.some(call => 
-        call[0].includes('When using movie limiting, both TAKE_AMOUNT and TAKE_STRATEGY must be specified')
+        call[0].includes('When using movie limiting, both LETTERBOXD_TAKE_AMOUNT and LETTERBOXD_TAKE_STRATEGY must be specified')
       );
       expect(hasMovieLimitingError).toBe(true);
     });
@@ -393,8 +393,8 @@ describe('env validation', () => {
         RADARR_API_URL: 'http://localhost:7878',
         RADARR_API_KEY: 'test-key',
         RADARR_QUALITY_PROFILE: 'HD-1080p',
-        TAKE_AMOUNT: '10',
-        TAKE_STRATEGY: 'newest'
+        LETTERBOXD_TAKE_AMOUNT: '10',
+        LETTERBOXD_TAKE_STRATEGY: 'newest'
       };
 
       const env = require('./env').default;
@@ -406,13 +406,13 @@ describe('env validation', () => {
       expect(typeof env.RADARR_API_KEY).toBe('string');
       expect(typeof env.RADARR_QUALITY_PROFILE).toBe('string');
       expect(typeof env.CHECK_INTERVAL_MINUTES).toBe('number');
-      expect(typeof env.TAKE_AMOUNT).toBe('number');
-      expect(typeof env.TAKE_STRATEGY).toBe('string');
+      expect(typeof env.LETTERBOXD_TAKE_AMOUNT).toBe('number');
+      expect(typeof env.LETTERBOXD_TAKE_STRATEGY).toBe('string');
       
       // Test enum values
       expect(['development', 'production', 'test']).toContain(env.NODE_ENV);
       expect(['error', 'warn', 'info', 'debug']).toContain(env.LOG_LEVEL);
-      expect(['newest', 'oldest']).toContain(env.TAKE_STRATEGY);
+      expect(['newest', 'oldest']).toContain(env.LETTERBOXD_TAKE_STRATEGY);
     });
   });
 });

@@ -53,9 +53,9 @@ services:
 |----------|---------|-------------|
 | `CHECK_INTERVAL_MINUTES` | `10` | How often to check for new movies (minimum 10) |
 | `RADARR_MINIMUM_AVAILABILITY` | `released` | When movie becomes available (`announced`, `inCinemas`, `released`) |
+| `LETTERBOXD_TAKE_AMOUNT` | - | Number of movies to sync (requires `LETTERBOXD_TAKE_STRATEGY`) |
+| `LETTERBOXD_TAKE_STRATEGY` | - | Movie selection strategy: `newest` or `oldest` (requires `LETTERBOXD_TAKE_AMOUNT`) |
 | `DATA_DIR` | `/data` | Directory for storing application data. You generally do not need to worry about this. |
-| `TAKE_AMOUNT` | - | Number of movies to sync (requires `TAKE_STRATEGY`) |
-| `TAKE_STRATEGY` | - | Movie selection strategy: `newest` or `oldest` (requires `TAKE_AMOUNT`) |
 
 ## Development
 
