@@ -1,10 +1,10 @@
-# Watchlistarr
+# Lettarrboxd
 
 Automatically sync your Letterboxd watchlist to Radarr for seamless movie management.
 
 ## Overview
 
-Watchlistarr is an application that monitors your Letterboxd watchlist and automatically pushes new movies to Radarr. It runs continuously, checking for updates at configurable intervals and only processing new additions to avoid duplicate API calls.
+Lettarrboxd is an application that monitors your Letterboxd watchlist and automatically pushes new movies to Radarr. It runs continuously, checking for updates at configurable intervals and only processing new additions to avoid duplicate API calls.
 
 ## Quick Start
 
@@ -12,12 +12,12 @@ Watchlistarr is an application that monitors your Letterboxd watchlist and autom
 
 ```bash
 docker run -d \
-  --name watchlistarr \
+  --name lettarrboxd \
   -e LETTERBOXD_USERNAME=your_username \
   -e RADARR_API_URL=http://your-radarr:7878 \
   -e RADARR_API_KEY=your_api_key \
   -e RADARR_QUALITY_PROFILE="HD-1080p" \
-  ryanpage/watchlistarr:latest
+  ryanpage/lettarrboxd:latest
 ```
 See [docker-compose.yaml](./docker-compose.yaml) for complete example.
 
@@ -38,6 +38,7 @@ See [docker-compose.yaml](./docker-compose.yaml) for complete example.
 |----------|---------|-------------|
 | `CHECK_INTERVAL_MINUTES` | `10` | How often to check for new movies (minimum 10) |
 | `RADARR_MINIMUM_AVAILABILITY` | `released` | When movie becomes available (`announced`, `inCinemas`, `released`) |
+| `RADARR_ROOT_FOLDER_ID` | - | Specific root folder ID to use in Radarr (uses first available if not set) |
 | `LETTERBOXD_TAKE_AMOUNT` | - | Number of movies to sync (requires `LETTERBOXD_TAKE_STRATEGY`) |
 | `LETTERBOXD_TAKE_STRATEGY` | - | Movie selection strategy: `newest` or `oldest` (requires `LETTERBOXD_TAKE_AMOUNT`) |
 | `DATA_DIR` | `/data` | Directory for storing application data. You generally do not need to worry about this. |
@@ -53,8 +54,8 @@ See [docker-compose.yaml](./docker-compose.yaml) for complete example.
 
 ```bash
 # Clone the repository
-git clone https://github.com/ryanpag3/watchlistarr.git
-cd watchlistarr
+git clone https://github.com/ryanpag3/lettarrboxd.git
+cd lettarrboxd
 
 # Install dependencies
 yarn install
@@ -101,7 +102,7 @@ When `NODE_ENV=development`, the application:
 
 **Docker container won't start**
 - Verify all required environment variables are set
-- Check container logs: `docker logs watchlistarr`
+- Check container logs: `docker logs lettarrboxd`
 
 ## License
 

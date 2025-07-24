@@ -1,7 +1,7 @@
 services:
-  watchlistarr:
-    image: ryanpage/watchlistarr:latest
-    container_name: watchlistarr
+  lettarrboxd:
+    image: ryanpage/lettarrboxd:latest
+    container_name: lettarrboxd
     environment:
       # Required variables
       - LETTERBOXD_USERNAME=your_username

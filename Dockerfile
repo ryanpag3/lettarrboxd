@@ -39,14 +39,14 @@ ENV NODE_ENV=production
 ENV DATA_DIR=/data
 
 # Create non-root user for security
-RUN addgroup -g 1001 -S watchlistarr && \
-    adduser -S watchlistarr -u 1001 -G watchlistarr
+RUN addgroup -g 1001 -S lettarrboxd && \
+    adduser -S lettarrboxd -u 1001 -G lettarrboxd
 
 # Change ownership of app and data directories
-RUN chown -R watchlistarr:watchlistarr /app /data
+RUN chown -R lettarrboxd:lettarrboxd /app /data
 
 # Switch to non-root user
-USER watchlistarr
+USER lettarrboxd
 
 # Expose port (optional, for health checks)
 EXPOSE 3000

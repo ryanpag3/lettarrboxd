@@ -9,6 +9,7 @@ const envSchema = z.object({
   RADARR_API_KEY: z.string(),
   RADARR_QUALITY_PROFILE: z.string(),
   RADARR_MINIMUM_AVAILABILITY: z.string().default('released'),
+  RADARR_ROOT_FOLDER_ID: z.string().optional(),
   CHECK_INTERVAL_MINUTES: z.string().default('10').transform(Number).pipe(z.number().min(10)),
   LETTERBOXD_TAKE_AMOUNT: z.string().optional().transform(val => val ? Number(val) : undefined).pipe(z.number().positive().optional()),
   LETTERBOXD_TAKE_STRATEGY: z.enum(['oldest', 'newest']).optional()

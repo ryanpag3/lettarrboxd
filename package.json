@@ -1,8 +1,8 @@
 {
-  "name": "watchlistarr",
+  "name": "lettarrboxd",
   "version": "1.0.0",
   "main": "dist/index.js",
-  "repository": "git@github.com:ryanpag3/watchlistarr.git",
+  "repository": "git@github.com:ryanpag3/lettarrboxd.git",
   "author": "Ryan Page <ryanapage@gmail.com>",
   "license": "MIT",
   "private": true,
@@ -20,6 +20,7 @@
     "cheerio": "^1.1.0",
     "dotenv": "^17.2.0",
     "nodemon": "^3.1.10",
+    "pino": "^9.7.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3",
     "zod": "^4.0.5"

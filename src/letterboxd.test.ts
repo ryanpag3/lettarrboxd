@@ -18,13 +18,28 @@ jest.mock('axios', () => ({
   }
 }));
 
+// Mock logger
+const mockLogger = {
+  info: jest.fn(),
+  debug: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn()
+};
+
+jest.mock('./logger', () => ({
+  __esModule: true,
+  default: mockLogger
+}));
+
 import { getWatchlistMovies } from './letterboxd';
 
 describe('letterboxd module', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.spyOn(console, 'log').mockImplementation();
-    jest.spyOn(console, 'error').mockImplementation();
+    mockLogger.info.mockClear();
+    mockLogger.debug.mockClear();
+    mockLogger.warn.mockClear();
+    mockLogger.error.mockClear();
   });
 
   afterEach(() => {
@@ -153,7 +168,7 @@ describe('letterboxd module', () => {
       const movies = await getWatchlistMovies();
 
       expect(movies).toHaveLength(0);
-      expect(console.error).toHaveBeenCalledWith('Error fetching page 1:', expect.any(Error));
+      expect(mockLogger.error).toHaveBeenCalledWith('Error fetching page 1:', expect.any(Error));
     });
 
     it('should handle empty watchlist pages', async () => {
@@ -218,7 +233,7 @@ describe('letterboxd module', () => {
       const movies = await getWatchlistMovies();
 
       expect(movies).toHaveLength(3);
-      expect(console.log).toHaveBeenCalledWith('Limiting to newest 3 movies');
+      expect(mockLogger.debug).toHaveBeenCalledWith('Limiting to newest 3 movies');
     });
 
     it('should limit to oldest N movies when LETTERBOXD_TAKE_STRATEGY=oldest', async () => {
@@ -242,7 +257,7 @@ describe('letterboxd module', () => {
       const movies = await getWatchlistMovies();
 
       expect(movies).toHaveLength(2);
-      expect(console.log).toHaveBeenCalledWith('Limiting to oldest 2 movies');
+      expect(mockLogger.debug).toHaveBeenCalledWith('Limiting to oldest 2 movies');
     });
 
     it('should return all movies when no limiting is configured', async () => {
@@ -318,7 +333,7 @@ describe('letterboxd module', () => {
 
       expect(movies).toHaveLength(1);
       expect(movies[0].tmdbId).toBeUndefined();
-      expect(console.error).toHaveBeenCalledWith(
+      expect(mockLogger.error).toHaveBeenCalledWith(
         'Error fetching TMDB ID for https://letterboxd.com/film/test-movie/:',
         expect.any(Error)
       );

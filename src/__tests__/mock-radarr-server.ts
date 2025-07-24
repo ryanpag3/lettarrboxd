@@ -76,6 +76,17 @@ export function createMockRadarrServer(port: number = 0): Promise<MockRadarrServ
       res.json(mockRootFolders);
     });
 
+    app.get('/api/v3/rootfolder/:id', (req, res) => {
+      const id = parseInt(req.params.id);
+      const rootFolder = mockRootFolders.find(rf => rf.id === id);
+      
+      if (rootFolder) {
+        res.json(rootFolder);
+      } else {
+        res.status(404).json({ error: 'Root folder not found' });
+      }
+    });
+
     app.get('/api/v3/tag', (req, res) => {
       res.json(mockTags);
     });
@@ -107,13 +118,14 @@ export function createMockRadarrServer(port: number = 0): Promise<MockRadarrServ
 
     const server = app.listen(port, () => {
       const actualPort = (server.address() as any)?.port || port;
-      console.log(`Mock Radarr server listening on port ${actualPort}`);
+      // Mock server started - logging omitted for tests
       
       resolve({
         server,
         port: actualPort,
         close: () => {
           return new Promise((resolve) => {
+            server.removeAllListeners();
             server.close(() => resolve());
           });
         }

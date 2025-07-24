@@ -14,7 +14,7 @@ on:
     types: [published]
 
 env:
-  IMAGE_NAME: ryanpage/watchlistarr
+  IMAGE_NAME: ryanpage/lettarrboxd
 
 jobs:
   test:
