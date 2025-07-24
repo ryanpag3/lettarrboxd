@@ -1,6 +1,7 @@
 import Axios from 'axios';
 import * as cheerio from 'cheerio';
 import env from './env';
+import logger from './logger';
 
 const axios = Axios.create();
 
@@ -47,7 +48,7 @@ async function getTmdbIdFromMoviePage(url: string): Promise<string | null> {
         
         return null;
     } catch (error) {
-        console.error(`Error fetching TMDB ID for ${url}:`, error);
+        logger.error(`Error fetching TMDB ID for ${url}:`, error);
         return null;
     }
 }
@@ -59,7 +60,7 @@ async function getAllWatchlistUrls(): Promise<string[]> {
     
     while (hasMorePages) {
         const watchListUrl = `https://letterboxd.com/${env.LETTERBOXD_USERNAME}/watchlist/page/${page}/`;
-        console.log(`Fetching page ${page}: ${watchListUrl}`);
+        logger.info(`Fetching page ${page}: ${watchListUrl}`);
         
         try {
             const response = await axios.get(watchListUrl);
@@ -82,7 +83,7 @@ async function getAllWatchlistUrls(): Promise<string[]> {
             // So we don't get in trouble
             await new Promise(resolve => setTimeout(resolve, 1000));
         } catch (error) {
-            console.error(`Error fetching page ${page}:`, error);
+            logger.error(`Error fetching page ${page}:`, error);
             hasMorePages = false;
         }
     }
@@ -93,13 +94,13 @@ async function getAllWatchlistUrls(): Promise<string[]> {
 function applyMovieLimiting(urls: string[]): string[] {
     // Development mode takes precedence
     if (env.NODE_ENV === 'development') {
-        console.log(`Development mode: processing only first 5 movies`);
+        logger.info(`Development mode: processing only first 5 movies`);
         return urls.slice(0, 5);
     }
     
     // Apply movie limiting based on new strategy
     if (env.LETTERBOXD_TAKE_AMOUNT && env.LETTERBOXD_TAKE_STRATEGY) {
-        console.log(`Limiting to ${env.LETTERBOXD_TAKE_STRATEGY} ${env.LETTERBOXD_TAKE_AMOUNT} movies`);
+        logger.info(`Limiting to ${env.LETTERBOXD_TAKE_STRATEGY} ${env.LETTERBOXD_TAKE_AMOUNT} movies`);
         
         if (env.LETTERBOXD_TAKE_STRATEGY === 'newest') {
             return urls.slice(0, env.LETTERBOXD_TAKE_AMOUNT);
@@ -114,14 +115,14 @@ function applyMovieLimiting(urls: string[]): string[] {
 export async function getWatchlistMovies(): Promise<Movie[]> {
     const urls = await getAllWatchlistUrls();
     
-    console.log('Total movies found across all pages:', urls.length);
+    logger.info('Total movies found across all pages:', urls.length);
     
     const urlsToProcess = applyMovieLimiting(urls);
     
     const movies: Movie[] = [];
     
     for (const url of urlsToProcess) {
-        console.log(`Fetching TMDB ID for: ${url}`);
+        logger.debug(`Fetching TMDB ID for: ${url}`);
         const tmdbId = await getTmdbIdFromMoviePage(url);
         
         movies.push({
@@ -133,6 +134,6 @@ export async function getWatchlistMovies(): Promise<Movie[]> {
         await new Promise(resolve => setTimeout(resolve, 500));
     }
     
-    console.log('Movies with TMDB IDs:', movies);
+    logger.debug('Movies with TMDB IDs:', movies);
     return movies;
 }

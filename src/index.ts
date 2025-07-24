@@ -3,6 +3,7 @@ require('dotenv').config();
 import * as fs from 'fs';
 import * as path from 'path';
 import env from './env';
+import logger from './logger';
 import { getWatchlistMovies } from './letterboxd';
 import { lookupMovieInRadarr, checkMovieInRadarr, addMovie } from './radarr';
 
@@ -23,17 +24,17 @@ async function readPreviousMovies(): Promise<Movie[]> {
     const filePath = path.join(env.DATA_DIR, 'movies.json');
 
     if (!fs.existsSync(filePath)) {
-      console.log('No previous movies.json found, treating all movies as new');
+      logger.info('No previous movies.json found, treating all movies as new');
       return [];
     }
 
     const fileContent = await fs.promises.readFile(filePath, 'utf8');
     const moviesData: MoviesData = JSON.parse(fileContent);
 
-    console.log(`Found ${moviesData.movies.length} movies in previous run (${moviesData.queryDate})`);
+    logger.info(`Found ${moviesData.movies.length} movies in previous run (${moviesData.queryDate})`);
     return moviesData.movies;
   } catch (error) {
-    console.error('Error reading previous movies:', error);
+    logger.error('Error reading previous movies:', error);
     return [];
   }
 }
@@ -42,7 +43,7 @@ function findNewMovies(currentMovies: Movie[], previousMovies: Movie[]): Movie[]
   const previousUrls = new Set(previousMovies.map(movie => movie.url));
   const newMovies = currentMovies.filter(movie => !previousUrls.has(movie.url));
 
-  console.log(`Found ${newMovies.length} new movies out of ${currentMovies.length} total movies`);
+  logger.info(`Found ${newMovies.length} new movies out of ${currentMovies.length} total movies`);
   return newMovies;
 }
 
@@ -64,42 +65,42 @@ async function writeMoviesToFile(movies: Movie[]): Promise<void> {
     const jsonData = JSON.stringify(moviesData, null, 2);
 
     await fs.promises.writeFile(filePath, jsonData, 'utf8');
-    console.log(`Movies saved to: ${filePath}`);
-    console.log(`Query completed at: ${moviesData.timestamp}`);
+    logger.info(`Movies saved to: ${filePath}`);
+    logger.info(`Query completed at: ${moviesData.timestamp}`);
   } catch (error) {
-    console.error('Error writing movies to file:', error);
+    logger.error('Error writing movies to file:', error);
     throw error;
   }
 }
 
 async function addMovieToRadarr(movie: Movie): Promise<void> {
   if (!movie.tmdbId) {
-    console.log('TMDB ID not found for movie');
+    logger.warn('TMDB ID not found for movie');
     return;
   }
 
-  console.log(`\n--- Processing new movie: ${movie.url} (TMDB: ${movie.tmdbId}) ---`);
+  logger.info(`\n--- Processing new movie: ${movie.url} (TMDB: ${movie.tmdbId}) ---`);
 
   const existingMovie = await checkMovieInRadarr(movie.tmdbId);
   
   if (existingMovie && existingMovie.length > 0) {
-    console.log(`Movie already exists in Radarr: ${existingMovie[0].title}`);
+    logger.info(`Movie already exists in Radarr: ${existingMovie[0].title}`);
     return;
   }
 
-  console.log('Movie not found in Radarr, looking up details...');
+  logger.info('Movie not found in Radarr, looking up details...');
   const movieDetails = await lookupMovieInRadarr(movie.tmdbId);
 
   if (movieDetails) {
-    console.log('Adding movie to Radarr...');
+    logger.info('Adding movie to Radarr...');
     await addMovie(movie.tmdbId, movieDetails);
   } else {
-    console.log('Could not lookup movie details, skipping addition');
+    logger.warn('Could not lookup movie details, skipping addition');
   }
 }
 
 async function processNewMovies(newMovies: Movie[]): Promise<void> {
-  console.log(`Processing ${newMovies.length} new movies for Radarr...`);
+  logger.info(`Processing ${newMovies.length} new movies for Radarr...`);
   
   for (const movie of newMovies) {
     await addMovieToRadarr(movie);
@@ -109,14 +110,14 @@ async function processNewMovies(newMovies: Movie[]): Promise<void> {
 
 function logWatchlistStart(): Date {
   const startTime = new Date();
-  console.log(`\n=== Starting watchlist check at ${startTime.toISOString()} ===`);
+  logger.info(`\n=== Starting watchlist check at ${startTime.toISOString()} ===`);
   return startTime;
 }
 
 function logWatchlistComplete(startTime: Date): void {
   const endTime = new Date();
   const duration = Math.round((endTime.getTime() - startTime.getTime()) / 1000);
-  console.log(`=== Watchlist check completed in ${duration}s at ${endTime.toISOString()} ===`);
+  logger.info(`=== Watchlist check completed in ${duration}s at ${endTime.toISOString()} ===`);
 }
 
 async function processWatchlist(): Promise<void> {
@@ -128,7 +129,7 @@ async function processWatchlist(): Promise<void> {
     const newMovies = findNewMovies(currentMovies, previousMovies);
 
     if (newMovies.length === 0) {
-      console.log('No new movies found, skipping Radarr processing');
+      logger.info('No new movies found, skipping Radarr processing');
     } else {
       await processNewMovies(newMovies);
     }
@@ -136,7 +137,7 @@ async function processWatchlist(): Promise<void> {
     await writeMoviesToFile(currentMovies);
     logWatchlistComplete(startTime);
   } catch (error) {
-    console.error('Error during watchlist processing:', error);
+    logger.error('Error during watchlist processing:', error);
   }
 }
 
@@ -144,23 +145,23 @@ function startScheduledMonitoring(): void {
   const intervalMinutes = env.CHECK_INTERVAL_MINUTES;
   const intervalMs = intervalMinutes * 60 * 1000;
 
-  console.log(`Starting scheduled monitoring every ${intervalMinutes} minutes`);
-  console.log(`Next check will be at: ${new Date(Date.now() + intervalMs).toISOString()}`);
+  logger.info(`Starting scheduled monitoring every ${intervalMinutes} minutes`);
+  logger.info(`Next check will be at: ${new Date(Date.now() + intervalMs).toISOString()}`);
 
   processWatchlist();
 
   setInterval(() => {
-    console.log(`\n--- Scheduled check triggered (interval: ${intervalMinutes} minutes) ---`);
+    logger.info(`\n--- Scheduled check triggered (interval: ${intervalMinutes} minutes) ---`);
     processWatchlist();
   }, intervalMs);
 }
 
 export async function main() {
-  console.log('Watchlistarr starting...');
-  console.log('Environment configuration:');
-  console.log(`- Check interval: ${env.CHECK_INTERVAL_MINUTES} minutes`);
-  console.log(`- Environment: ${env.NODE_ENV}`);
-  console.log(`- Letterboxd user: ${env.LETTERBOXD_USERNAME}`);
+  logger.info('Watchlistarr starting...');
+  logger.info('Environment configuration:');
+  logger.info(`- Check interval: ${env.CHECK_INTERVAL_MINUTES} minutes`);
+  logger.info(`- Environment: ${env.NODE_ENV}`);
+  logger.info(`- Letterboxd user: ${env.LETTERBOXD_USERNAME}`);
 
   startScheduledMonitoring();
 }
@@ -169,5 +170,5 @@ export { processWatchlist, startScheduledMonitoring };
 
 // Only run main if this file is executed directly
 if (require.main === module) {
-  main().catch(console.error);
+  main().catch(logger.error);
 }

@@ -107,7 +107,7 @@ export function createMockRadarrServer(port: number = 0): Promise<MockRadarrServ
 
     const server = app.listen(port, () => {
       const actualPort = (server.address() as any)?.port || port;
-      console.log(`Mock Radarr server listening on port ${actualPort}`);
+      // Mock server started - logging omitted for tests
       
       resolve({
         server,

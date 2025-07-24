@@ -42,6 +42,19 @@ jest.mock('dotenv', () => ({
   config: jest.fn()
 }));
 
+// Mock logger
+const mockLogger = {
+  info: jest.fn(),
+  debug: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn()
+};
+
+jest.mock('./logger', () => ({
+  __esModule: true,
+  default: mockLogger
+}));
+
 // Don't mock setInterval for these tests as we need to test the actual function calls
 
 // Import the module functions without executing main
@@ -62,8 +75,10 @@ describe('index module', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks();
-    jest.spyOn(console, 'log').mockImplementation();
-    jest.spyOn(console, 'error').mockImplementation();
+    mockLogger.info.mockClear();
+    mockLogger.debug.mockClear();
+    mockLogger.warn.mockClear();
+    mockLogger.error.mockClear();
   });
 
   afterEach(() => {
@@ -109,7 +124,7 @@ describe('index module', () => {
 
       await processWatchlist();
 
-      expect(console.log).toHaveBeenCalledWith('No previous movies.json found, treating all movies as new');
+      expect(mockLogger.info).toHaveBeenCalledWith('No previous movies.json found, treating all movies as new');
     });
 
     it('should write movies to JSON file with correct structure', async () => {
@@ -161,7 +176,7 @@ describe('index module', () => {
 
       await processWatchlist();
 
-      expect(console.log).toHaveBeenCalledWith('Found 1 new movies out of 3 total movies');
+      expect(mockLogger.info).toHaveBeenCalledWith('Found 1 new movies out of 3 total movies');
     });
 
     it('should skip processing when no new movies found', async () => {
@@ -179,7 +194,7 @@ describe('index module', () => {
 
       await processWatchlist();
 
-      expect(console.log).toHaveBeenCalledWith('No new movies found, skipping Radarr processing');
+      expect(mockLogger.info).toHaveBeenCalledWith('No new movies found, skipping Radarr processing');
     });
 
     it('should process new movies and add them to Radarr', async () => {
@@ -226,7 +241,7 @@ describe('index module', () => {
       await processWatchlist();
 
       expect(mockCheckMovieInRadarr).toHaveBeenCalledWith('123');
-      expect(console.log).toHaveBeenCalledWith('Movie already exists in Radarr: Existing Movie');
+      expect(mockLogger.info).toHaveBeenCalledWith('Movie already exists in Radarr: Existing Movie');
     });
 
     it('should skip movies without TMDB ID', async () => {
@@ -241,7 +256,7 @@ describe('index module', () => {
 
       await processWatchlist();
 
-      expect(console.log).toHaveBeenCalledWith('TMDB ID not found for movie');
+      expect(mockLogger.warn).toHaveBeenCalledWith('TMDB ID not found for movie');
     });
 
     it('should handle movie lookup failures gracefully', async () => {
@@ -258,7 +273,7 @@ describe('index module', () => {
 
       await processWatchlist();
 
-      expect(console.log).toHaveBeenCalledWith('Could not lookup movie details, skipping addition');
+      expect(mockLogger.warn).toHaveBeenCalledWith('Could not lookup movie details, skipping addition');
     });
   });
 
@@ -281,9 +296,9 @@ describe('index module', () => {
 
       startScheduledMonitoring();
 
-      expect(console.log).toHaveBeenCalledWith('Starting scheduled monitoring every 60 minutes');
+      expect(mockLogger.info).toHaveBeenCalledWith('Starting scheduled monitoring every 60 minutes');
       // Check that setInterval was called (we can't easily mock this without affecting the actual function)
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Next check will be at:'));
+      expect(mockLogger.info).toHaveBeenCalledWith(expect.stringContaining('Next check will be at:'));
     });
 
     it('should log application startup information', async () => {
@@ -299,11 +314,11 @@ describe('index module', () => {
       const { main } = require('./index');
       await main();
 
-      expect(console.log).toHaveBeenCalledWith('Watchlistarr starting...');
-      expect(console.log).toHaveBeenCalledWith('Environment configuration:');
-      expect(console.log).toHaveBeenCalledWith('- Check interval: 60 minutes');
-      expect(console.log).toHaveBeenCalledWith('- Environment: test');
-      expect(console.log).toHaveBeenCalledWith('- Letterboxd user: testuser');
+      expect(mockLogger.info).toHaveBeenCalledWith('Watchlistarr starting...');
+      expect(mockLogger.info).toHaveBeenCalledWith('Environment configuration:');
+      expect(mockLogger.info).toHaveBeenCalledWith('- Check interval: 60 minutes');
+      expect(mockLogger.info).toHaveBeenCalledWith('- Environment: test');
+      expect(mockLogger.info).toHaveBeenCalledWith('- Letterboxd user: testuser');
     });
 
     it('should handle processing errors gracefully', async () => {
@@ -315,7 +330,7 @@ describe('index module', () => {
 
       await processWatchlist();
 
-      expect(console.error).toHaveBeenCalledWith('Error during watchlist processing:', error);
+      expect(mockLogger.error).toHaveBeenCalledWith('Error during watchlist processing:', error);
     });
   });
 
