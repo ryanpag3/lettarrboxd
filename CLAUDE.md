@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Watchlistarr is a TypeScript Node.js application that automatically syncs Letterboxd watchlist movies to Radarr. It continuously monitors a user's Letterboxd watchlist for new additions and automatically adds them to Radarr for download management.
+Lettarrboxd is a TypeScript Node.js application that automatically syncs Letterboxd watchlist movies to Radarr. It continuously monitors a user's Letterboxd watchlist for new additions and automatically adds them to Radarr for download management.
 
 ## Commands
 
@@ -16,8 +16,8 @@ Watchlistarr is a TypeScript Node.js application that automatically syncs Letter
 - `yarn tsc --noEmit` - Type check without emitting files
 
 ### Docker
-- `docker build -t watchlistarr .` - Build Docker image
-- `docker run -d --env-file .env -v ./data:/data watchlistarr` - Run container
+- `docker build -t lettarrboxd .` - Build Docker image
+- `docker run -d --env-file .env -v ./data:/data lettarrboxd` - Run container
 
 ## Environment Configuration
 

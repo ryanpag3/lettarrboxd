@@ -314,7 +314,7 @@ describe('index module', () => {
       const { main } = require('./index');
       await main();
 
-      expect(mockLogger.info).toHaveBeenCalledWith('Watchlistarr starting...');
+      expect(mockLogger.info).toHaveBeenCalledWith('Lettarrboxd starting...');
       expect(mockLogger.info).toHaveBeenCalledWith('Environment configuration:');
       expect(mockLogger.info).toHaveBeenCalledWith('- Check interval: 60 minutes');
       expect(mockLogger.info).toHaveBeenCalledWith('- Environment: test');

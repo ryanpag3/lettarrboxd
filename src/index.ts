@@ -157,7 +157,7 @@ function startScheduledMonitoring(): void {
 }
 
 export async function main() {
-  logger.info('Watchlistarr starting...');
+  logger.info('Lettarrboxd starting...');
   logger.info('Environment configuration:');
   logger.info(`- Check interval: ${env.CHECK_INTERVAL_MINUTES} minutes`);
   logger.info(`- Environment: ${env.NODE_ENV}`);
