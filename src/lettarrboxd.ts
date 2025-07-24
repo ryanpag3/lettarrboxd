@@ -22,14 +22,14 @@ async function readPreviousMovies(): Promise<Movie[]> {
     const filePath = path.join(env.DATA_DIR, 'movies.json');
 
     if (!fs.existsSync(filePath)) {
-      logger.info('No previous movies.json found, treating all movies as new');
+      logger.debug('No previous movies.json found, treating all movies as new');
       return [];
     }
 
     const fileContent = await fs.promises.readFile(filePath, 'utf8');
     const moviesData: MoviesData = JSON.parse(fileContent);
 
-    logger.info(`Found ${moviesData.movies.length} movies in previous run (${moviesData.queryDate})`);
+    logger.debug(`Found ${moviesData.movies.length} movies in previous run (${moviesData.queryDate})`);
     return moviesData.movies;
   } catch (error) {
     logger.error('Error reading previous movies:', error);
@@ -41,7 +41,7 @@ function findNewMovies(currentMovies: Movie[], previousMovies: Movie[]): Movie[]
   const previousUrls = new Set(previousMovies.map(movie => movie.url));
   const newMovies = currentMovies.filter(movie => !previousUrls.has(movie.url));
 
-  logger.info(`Found ${newMovies.length} new movies out of ${currentMovies.length} total movies`);
+  logger.debug(`Found ${newMovies.length} new movies out of ${currentMovies.length} total movies`);
   return newMovies;
 }
 
@@ -63,8 +63,8 @@ async function writeMoviesToFile(movies: Movie[]): Promise<void> {
     const jsonData = JSON.stringify(moviesData, null, 2);
 
     await fs.promises.writeFile(filePath, jsonData, 'utf8');
-    logger.info(`Movies saved to: ${filePath}`);
-    logger.info(`Query completed at: ${moviesData.timestamp}`);
+    logger.debug(`Movies saved to: ${filePath}`);
+    logger.debug(`Query completed at: ${moviesData.timestamp}`);
   } catch (error) {
     logger.error('Error writing movies to file:', error);
     throw error;
@@ -108,14 +108,14 @@ async function processNewMovies(newMovies: Movie[]): Promise<void> {
 
 function logWatchlistStart(): Date {
   const startTime = new Date();
-  logger.info(`\n=== Starting watchlist check at ${startTime.toISOString()} ===`);
+  logger.debug(`\n=== Starting watchlist check at ${startTime.toISOString()} ===`);
   return startTime;
 }
 
 function logWatchlistComplete(startTime: Date): void {
   const endTime = new Date();
   const duration = Math.round((endTime.getTime() - startTime.getTime()) / 1000);
-  logger.info(`=== Watchlist check completed in ${duration}s at ${endTime.toISOString()} ===`);
+  logger.debug(`=== Watchlist check completed in ${duration}s at ${endTime.toISOString()} ===`);
 }
 
 export async function processWatchlist(): Promise<void> {
@@ -127,7 +127,7 @@ export async function processWatchlist(): Promise<void> {
     const newMovies = findNewMovies(currentMovies, previousMovies);
 
     if (newMovies.length === 0) {
-      logger.info('No new movies found, skipping Radarr processing');
+      logger.debug('No new movies found, skipping Radarr processing');
     } else {
       await processNewMovies(newMovies);
     }

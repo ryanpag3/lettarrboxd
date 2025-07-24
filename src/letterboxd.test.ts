@@ -233,7 +233,7 @@ describe('letterboxd module', () => {
       const movies = await getWatchlistMovies();
 
       expect(movies).toHaveLength(3);
-      expect(mockLogger.info).toHaveBeenCalledWith('Limiting to newest 3 movies');
+      expect(mockLogger.debug).toHaveBeenCalledWith('Limiting to newest 3 movies');
     });
 
     it('should limit to oldest N movies when LETTERBOXD_TAKE_STRATEGY=oldest', async () => {
@@ -257,7 +257,7 @@ describe('letterboxd module', () => {
       const movies = await getWatchlistMovies();
 
       expect(movies).toHaveLength(2);
-      expect(mockLogger.info).toHaveBeenCalledWith('Limiting to oldest 2 movies');
+      expect(mockLogger.debug).toHaveBeenCalledWith('Limiting to oldest 2 movies');
     });
 
     it('should return all movies when no limiting is configured', async () => {

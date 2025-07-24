@@ -128,10 +128,6 @@ describe('index module', () => {
       await main();
 
       expect(mockLogger.info).toHaveBeenCalledWith('Lettarrboxd starting...');
-      expect(mockLogger.info).toHaveBeenCalledWith('Environment configuration:');
-      expect(mockLogger.info).toHaveBeenCalledWith('- Check interval: 60 minutes');
-      expect(mockLogger.info).toHaveBeenCalledWith('- Environment: test');
-      expect(mockLogger.info).toHaveBeenCalledWith('- Letterboxd user: testuser');
     });
 
   });

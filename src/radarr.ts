@@ -11,7 +11,7 @@ const axios = Axios.create({
 
 export async function lookupMovieInRadarr(tmdbId: string): Promise<any> {
     try {
-        logger.info(`Looking up TMDB ID ${tmdbId} in Radarr...`);
+        logger.debug(`Looking up TMDB ID ${tmdbId} in Radarr...`);
         
         const response = await axios.get(`/api/v3/movie/lookup/tmdb`, {
             params: {
@@ -29,7 +29,7 @@ export async function lookupMovieInRadarr(tmdbId: string): Promise<any> {
 
 export async function checkMovieInRadarr(tmdbId: string): Promise<any> {
     try {
-        logger.info(`Checking if TMDB ID ${tmdbId} exists in Radarr...`);
+        logger.debug(`Checking if TMDB ID ${tmdbId} exists in Radarr...`);
         
         const response = await axios.get('/api/v3/movie', {
             params: {
@@ -47,18 +47,18 @@ export async function checkMovieInRadarr(tmdbId: string): Promise<any> {
 
 export async function getQualityProfileId(profileName: string): Promise<number | null> {
     try {
-        logger.info(`Getting quality profile ID for: ${profileName}`);
+        logger.debug(`Getting quality profile ID for: ${profileName}`);
         
         const response = await axios.get('/api/v3/qualityprofile');
         const profiles = response.data;
         
         const profile = profiles.find((p: any) => p.name === profileName);
         if (profile) {
-            logger.info(`Found quality profile: ${profileName} (ID: ${profile.id})`);
+            logger.debug(`Found quality profile: ${profileName} (ID: ${profile.id})`);
             return profile.id;
         } else {
             logger.error(`Quality profile not found: ${profileName}`);
-            logger.info('Available profiles:', profiles.map((p: any) => p.name));
+            logger.debug('Available profiles:', profiles.map((p: any) => p.name));
             return null;
         }
     } catch (error) {
@@ -74,7 +74,7 @@ export async function getRootFolder(): Promise<string | null> {
         
         if (rootFolders.length > 0) {
             const rootFolder = rootFolders[0].path;
-            logger.info(`Using root folder: ${rootFolder}`);
+            logger.debug(`Using root folder: ${rootFolder}`);
             return rootFolder;
         } else {
             logger.error('No root folders found in Radarr');
@@ -88,18 +88,18 @@ export async function getRootFolder(): Promise<string | null> {
 
 export async function getOrCreateTag(tagName: string): Promise<number | null> {
     try {
-        logger.info(`Getting or creating tag: ${tagName}`);
+        logger.debug(`Getting or creating tag: ${tagName}`);
         
         const response = await axios.get('/api/v3/tag');
         const tags = response.data;
         
         const existingTag = tags.find((tag: any) => tag.label === tagName);
         if (existingTag) {
-            logger.info(`Tag already exists: ${tagName} (ID: ${existingTag.id})`);
+            logger.debug(`Tag already exists: ${tagName} (ID: ${existingTag.id})`);
             return existingTag.id;
         }
         
-        logger.info(`Creating new tag: ${tagName}`);
+        logger.debug(`Creating new tag: ${tagName}`);
         const createResponse = await axios.post('/api/v3/tag', {
             label: tagName
         });
@@ -119,7 +119,7 @@ export async function addMovie(tmdbId: string, movieData: any): Promise<any> {
             return null;
         }
         
-        logger.info(`Adding movie to Radarr: ${movieData.title} (TMDB: ${tmdbId})`);
+        logger.debug(`Adding movie to Radarr: ${movieData.title} (TMDB: ${tmdbId})`);
         
         const qualityProfileId = await getQualityProfileId(env.RADARR_QUALITY_PROFILE);
         if (!qualityProfileId) {

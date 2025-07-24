@@ -91,7 +91,7 @@ describe('lettarrboxd module', () => {
       await processWatchlist();
 
       expect(mockGetWatchlistMovies).toHaveBeenCalled();
-      expect(mockLogger.info).toHaveBeenCalledWith('Found 1 new movies out of 2 total movies');
+      expect(mockLogger.debug).toHaveBeenCalledWith('Found 1 new movies out of 2 total movies');
       expect(mockCheckMovieInRadarr).toHaveBeenCalledWith('456');
       expect(mockLookupMovieInRadarr).toHaveBeenCalledWith('456');
       expect(mockAddMovie).toHaveBeenCalledWith('456', movieDetails);
@@ -111,7 +111,7 @@ describe('lettarrboxd module', () => {
       const { processWatchlist } = require('./lettarrboxd');
       await processWatchlist();
 
-      expect(mockLogger.info).toHaveBeenCalledWith('No new movies found, skipping Radarr processing');
+      expect(mockLogger.debug).toHaveBeenCalledWith('No new movies found, skipping Radarr processing');
       expect(mockCheckMovieInRadarr).not.toHaveBeenCalled();
     });
 
@@ -128,8 +128,8 @@ describe('lettarrboxd module', () => {
       const { processWatchlist } = require('./lettarrboxd');
       await processWatchlist();
 
-      expect(mockLogger.info).toHaveBeenCalledWith('No previous movies.json found, treating all movies as new');
-      expect(mockLogger.info).toHaveBeenCalledWith('Found 1 new movies out of 1 total movies');
+      expect(mockLogger.debug).toHaveBeenCalledWith('No previous movies.json found, treating all movies as new');
+      expect(mockLogger.debug).toHaveBeenCalledWith('Found 1 new movies out of 1 total movies');
     });
 
     it('should skip movies without TMDB ID', async () => {
@@ -246,7 +246,7 @@ describe('lettarrboxd module', () => {
       await processWatchlist();
 
       expect(mockLogger.error).toHaveBeenCalledWith('Error reading previous movies:', error);
-      expect(mockLogger.info).toHaveBeenCalledWith('Found 1 new movies out of 1 total movies');
+      expect(mockLogger.debug).toHaveBeenCalledWith('Found 1 new movies out of 1 total movies');
     });
 
     it('should handle file write errors by throwing', async () => {

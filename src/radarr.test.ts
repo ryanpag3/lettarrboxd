@@ -73,7 +73,7 @@ describe('radarr module', () => {
         params: { tmdbId: '12345' }
       });
       expect(result).toEqual(mockMovieData);
-      expect(mockLogger.info).toHaveBeenCalledWith('Looking up TMDB ID 12345 in Radarr...');
+      expect(mockLogger.debug).toHaveBeenCalledWith('Looking up TMDB ID 12345 in Radarr...');
     });
 
     it('should handle API errors and return null', async () => {
@@ -107,7 +107,7 @@ describe('radarr module', () => {
         params: { tmdbId: '12345' }
       });
       expect(result).toEqual(mockLibraryData);
-      expect(mockLogger.info).toHaveBeenCalledWith('Checking if TMDB ID 12345 exists in Radarr...');
+      expect(mockLogger.debug).toHaveBeenCalledWith('Checking if TMDB ID 12345 exists in Radarr...');
     });
 
     it('should return empty array for non-existent movie', async () => {
@@ -142,8 +142,8 @@ describe('radarr module', () => {
 
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v3/qualityprofile');
       expect(result).toBe(2);
-      expect(mockLogger.info).toHaveBeenCalledWith('Getting quality profile ID for: HD-1080p');
-      expect(mockLogger.info).toHaveBeenCalledWith('Found quality profile: HD-1080p (ID: 2)');
+      expect(mockLogger.debug).toHaveBeenCalledWith('Getting quality profile ID for: HD-1080p');
+      expect(mockLogger.debug).toHaveBeenCalledWith('Found quality profile: HD-1080p (ID: 2)');
     });
 
     it('should return null when profile does not exist', async () => {
@@ -154,7 +154,7 @@ describe('radarr module', () => {
 
       expect(result).toBeNull();
       expect(mockLogger.error).toHaveBeenCalledWith('Quality profile not found: NonExistent');
-      expect(mockLogger.info).toHaveBeenCalledWith('Available profiles:', ['SD']);
+      expect(mockLogger.debug).toHaveBeenCalledWith('Available profiles:', ['SD']);
     });
 
     it('should handle API errors', async () => {
@@ -180,7 +180,7 @@ describe('radarr module', () => {
 
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v3/rootfolder');
       expect(result).toBe('/movies');
-      expect(mockLogger.info).toHaveBeenCalledWith('Using root folder: /movies');
+      expect(mockLogger.debug).toHaveBeenCalledWith('Using root folder: /movies');
     });
 
     it('should return null when no root folders exist', async () => {
@@ -215,8 +215,8 @@ describe('radarr module', () => {
 
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v3/tag');
       expect(result).toBe(2);
-      expect(mockLogger.info).toHaveBeenCalledWith('Getting or creating tag: letterboxd-watchlist');
-      expect(mockLogger.info).toHaveBeenCalledWith('Tag already exists: letterboxd-watchlist (ID: 2)');
+      expect(mockLogger.debug).toHaveBeenCalledWith('Getting or creating tag: letterboxd-watchlist');
+      expect(mockLogger.debug).toHaveBeenCalledWith('Tag already exists: letterboxd-watchlist (ID: 2)');
     });
 
     it('should create new tag when tag does not exist', async () => {
@@ -232,7 +232,7 @@ describe('radarr module', () => {
         label: 'new-tag'
       });
       expect(result).toBe(3);
-      expect(mockLogger.info).toHaveBeenCalledWith('Creating new tag: new-tag');
+      expect(mockLogger.debug).toHaveBeenCalledWith('Creating new tag: new-tag');
       expect(mockLogger.info).toHaveBeenCalledWith('Created tag: new-tag (ID: 3)');
     });
 
@@ -284,7 +284,7 @@ describe('radarr module', () => {
         }
       });
       expect(result).toEqual(mockAddedMovie);
-      expect(mockLogger.info).toHaveBeenCalledWith('Adding movie to Radarr: Test Movie (TMDB: 12345)');
+      expect(mockLogger.debug).toHaveBeenCalledWith('Adding movie to Radarr: Test Movie (TMDB: 12345)');
     });
 
     it('should return null when movie data is null', async () => {

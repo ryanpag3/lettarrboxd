@@ -60,7 +60,7 @@ async function getAllWatchlistUrls(): Promise<string[]> {
     
     while (hasMorePages) {
         const watchListUrl = `https://letterboxd.com/${env.LETTERBOXD_USERNAME}/watchlist/page/${page}/`;
-        logger.info(`Fetching page ${page}: ${watchListUrl}`);
+        logger.debug(`Fetching page ${page}: ${watchListUrl}`);
         
         try {
             const response = await axios.get(watchListUrl);
@@ -94,13 +94,13 @@ async function getAllWatchlistUrls(): Promise<string[]> {
 function applyMovieLimiting(urls: string[]): string[] {
     // Development mode takes precedence
     if (env.NODE_ENV === 'development') {
-        logger.info(`Development mode: processing only first 5 movies`);
+        logger.debug(`Development mode: processing only first 5 movies`);
         return urls.slice(0, 5);
     }
     
     // Apply movie limiting based on new strategy
     if (env.LETTERBOXD_TAKE_AMOUNT && env.LETTERBOXD_TAKE_STRATEGY) {
-        logger.info(`Limiting to ${env.LETTERBOXD_TAKE_STRATEGY} ${env.LETTERBOXD_TAKE_AMOUNT} movies`);
+        logger.debug(`Limiting to ${env.LETTERBOXD_TAKE_STRATEGY} ${env.LETTERBOXD_TAKE_AMOUNT} movies`);
         
         if (env.LETTERBOXD_TAKE_STRATEGY === 'newest') {
             return urls.slice(0, env.LETTERBOXD_TAKE_AMOUNT);
