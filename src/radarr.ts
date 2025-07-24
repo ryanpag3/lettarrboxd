@@ -86,6 +86,21 @@ export async function getRootFolder(): Promise<string | null> {
     }
 }
 
+export async function getRootFolderById(id: string) {
+    try {
+        const response = await axios.get(`/api/v3/rootfolder/${id}`);
+        const { data } = response;
+        if (data) {
+            return data.path;
+        } else {
+            return null;
+        }
+    } catch (e) {
+        logger.error(`Error getting root folder by id: ${id}`);
+        return null;
+    }
+}
+
 export async function getOrCreateTag(tagName: string): Promise<number | null> {
     try {
         logger.debug(`Getting or creating tag: ${tagName}`);
@@ -126,7 +141,7 @@ export async function addMovie(tmdbId: string, movieData: any): Promise<any> {
             throw new Error(`Could not find quality profile: ${env.RADARR_QUALITY_PROFILE}`);
         }
         
-        const rootFolderPath = await getRootFolder();
+        const rootFolderPath = !env.RADARR_ROOT_FOLDER_ID ? await getRootFolder() : await getRootFolderById(env.RADARR_ROOT_FOLDER_ID);
         if (!rootFolderPath) {
             throw new Error('Could not get root folder');
         }

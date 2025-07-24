@@ -107,6 +107,18 @@ describe('Integration Tests', () => {
       expect(rootFolder).toBe('/movies');
     });
 
+    it('should get root folder by ID', async () => {
+      const rootFolderPath = await radarrModule.getRootFolderById('1');
+      
+      expect(rootFolderPath).toBe('/movies');
+    });
+
+    it('should return null for non-existent root folder ID', async () => {
+      const rootFolderPath = await radarrModule.getRootFolderById('999');
+      
+      expect(rootFolderPath).toBeNull();
+    });
+
     it('should get or create tag', async () => {
       // Get existing tag
       const existingTagId = await radarrModule.getOrCreateTag('existing-tag');
@@ -134,6 +146,31 @@ describe('Integration Tests', () => {
       expect(addedMovie.rootFolderPath).toBe('/movies');
       expect(addedMovie.monitored).toBe(true);
       expect(addedMovie.tags).toContain(2); // letterboxd-watchlist tag
+    });
+
+    it('should use specific root folder when RADARR_ROOT_FOLDER_ID is set', async () => {
+      // Temporarily set the environment variable
+      const originalRootFolderId = process.env.RADARR_ROOT_FOLDER_ID;
+      process.env.RADARR_ROOT_FOLDER_ID = '2';
+      
+      // Reset modules to pick up new environment
+      jest.resetModules();
+      const radarrModuleWithRootId = await import('../radarr');
+      
+      const movieData = await radarrModuleWithRootId.lookupMovieInRadarr('12345');
+      expect(movieData).toBeDefined();
+      
+      const addedMovie = await radarrModuleWithRootId.addMovie('12345', movieData);
+      
+      expect(addedMovie).toBeDefined();
+      expect(addedMovie.rootFolderPath).toBe('/movies-4k');
+      
+      // Restore original environment
+      if (originalRootFolderId) {
+        process.env.RADARR_ROOT_FOLDER_ID = originalRootFolderId;
+      } else {
+        delete process.env.RADARR_ROOT_FOLDER_ID;
+      }
     });
   });
 

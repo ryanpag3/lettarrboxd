@@ -38,6 +38,7 @@ See [docker-compose.yaml](./docker-compose.yaml) for complete example.
 |----------|---------|-------------|
 | `CHECK_INTERVAL_MINUTES` | `10` | How often to check for new movies (minimum 10) |
 | `RADARR_MINIMUM_AVAILABILITY` | `released` | When movie becomes available (`announced`, `inCinemas`, `released`) |
+| `RADARR_ROOT_FOLDER_ID` | - | Specific root folder ID to use in Radarr (uses first available if not set) |
 | `LETTERBOXD_TAKE_AMOUNT` | - | Number of movies to sync (requires `LETTERBOXD_TAKE_STRATEGY`) |
 | `LETTERBOXD_TAKE_STRATEGY` | - | Movie selection strategy: `newest` or `oldest` (requires `LETTERBOXD_TAKE_AMOUNT`) |
 | `DATA_DIR` | `/data` | Directory for storing application data. You generally do not need to worry about this. |
