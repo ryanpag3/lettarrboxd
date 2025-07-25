@@ -1,74 +1,10 @@
 import { getWatchlistMovies } from "./scraper/letterboxd";
 import logger from "./util/logger";
 import { addMovie, checkMovieInRadarr, lookupMovieInRadarr } from "./api/radarr";
-import env from './util/env';
-import fs from 'fs';
-import path from 'path';
 
 interface Movie {
   url: string;
   tmdbId?: string;
-}
-
-interface MoviesData {
-  timestamp: string;
-  queryDate: string;
-  totalMovies: number;
-  movies: Movie[];
-}
-
-async function readPreviousMovies(): Promise<Movie[]> {
-  try {
-    const filePath = path.join(env.DATA_DIR, 'movies.json');
-
-    if (!fs.existsSync(filePath)) {
-      logger.debug('No previous movies.json found, treating all movies as new');
-      return [];
-    }
-
-    const fileContent = await fs.promises.readFile(filePath, 'utf8');
-    const moviesData: MoviesData = JSON.parse(fileContent);
-
-    logger.debug(`Found ${moviesData.movies.length} movies in previous run (${moviesData.queryDate})`);
-    return moviesData.movies;
-  } catch (error) {
-    logger.error('Error reading previous movies:', error);
-    return [];
-  }
-}
-
-function findNewMovies(currentMovies: Movie[], previousMovies: Movie[]): Movie[] {
-  const previousUrls = new Set(previousMovies.map(movie => movie.url));
-  const newMovies = currentMovies.filter(movie => !previousUrls.has(movie.url));
-
-  logger.debug(`Found ${newMovies.length} new movies out of ${currentMovies.length} total movies`);
-  return newMovies;
-}
-
-async function writeMoviesToFile(movies: Movie[]): Promise<void> {
-  try {
-    if (!fs.existsSync(env.DATA_DIR)) {
-      fs.mkdirSync(env.DATA_DIR, { recursive: true });
-    }
-
-    const now = new Date();
-    const moviesData: MoviesData = {
-      timestamp: now.toISOString(),
-      queryDate: now.toLocaleDateString(),
-      totalMovies: movies.length,
-      movies
-    };
-
-    const filePath = path.join(env.DATA_DIR, 'movies.json');
-    const jsonData = JSON.stringify(moviesData, null, 2);
-
-    await fs.promises.writeFile(filePath, jsonData, 'utf8');
-    logger.debug(`Movies saved to: ${filePath}`);
-    logger.debug(`Query completed at: ${moviesData.timestamp}`);
-  } catch (error) {
-    logger.error('Error writing movies to file:', error);
-    throw error;
-  }
 }
 
 async function addMovieToRadarr(movie: Movie): Promise<void> {
@@ -97,10 +33,10 @@ async function addMovieToRadarr(movie: Movie): Promise<void> {
   }
 }
 
-async function processNewMovies(newMovies: Movie[]): Promise<void> {
-  logger.info(`Processing ${newMovies.length} new movies for Radarr...`);
+async function processMovies(movies: Movie[]): Promise<void> {
+  logger.info(`Processing ${movies.length} movies for Radarr...`);
   
-  for (const movie of newMovies) {
+  for (const movie of movies) {
     await addMovieToRadarr(movie);
     await new Promise(resolve => setTimeout(resolve, 1000));
   }
@@ -122,17 +58,14 @@ export async function processWatchlist(): Promise<void> {
   try {
     const startTime = logWatchlistStart();
     
-    const currentMovies = await getWatchlistMovies();
-    const previousMovies = await readPreviousMovies();
-    const newMovies = findNewMovies(currentMovies, previousMovies);
+    const movies = await getWatchlistMovies();
 
-    if (newMovies.length === 0) {
-      logger.debug('No new movies found, skipping Radarr processing');
+    if (movies.length === 0) {
+      logger.debug('No movies found in watchlist');
     } else {
-      await processNewMovies(newMovies);
+      await processMovies(movies);
     }
 
-    await writeMoviesToFile(currentMovies);
     logWatchlistComplete(startTime);
   } catch (error) {
     logger.error('Error during watchlist processing:', error);
