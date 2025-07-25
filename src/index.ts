@@ -1,7 +1,7 @@
 require('dotenv').config();
 
-import env from './env';
-import logger from './logger';
+import env from './util/env';
+import logger from './util/logger';
 import { processWatchlist } from './lettarrboxd';
 
 function startScheduledMonitoring(): void {

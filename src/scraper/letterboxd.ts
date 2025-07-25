@@ -1,7 +1,7 @@
 import Axios from 'axios';
 import * as cheerio from 'cheerio';
-import env from './env';
-import logger from './logger';
+import env from '../util/env';
+import logger from '../util/logger';
 
 const axios = Axios.create();
 

@@ -1,7 +1,7 @@
-import { getWatchlistMovies } from "./letterboxd";
-import logger from "./logger";
-import { addMovie, checkMovieInRadarr, lookupMovieInRadarr } from "./radarr";
-import env from './env';
+import { getWatchlistMovies } from "./scraper/letterboxd";
+import logger from "./util/logger";
+import { addMovie, checkMovieInRadarr, lookupMovieInRadarr } from "./api/radarr";
+import env from './util/env';
 import fs from 'fs';
 import path from 'path';
 
