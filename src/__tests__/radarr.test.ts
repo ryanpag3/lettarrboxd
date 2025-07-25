@@ -40,7 +40,7 @@ import {
   getRootFolder, 
   getOrCreateTag, 
   addMovie 
-} from './radarr';
+} from '../radarr';
 
 describe('radarr module', () => {
   beforeEach(() => {

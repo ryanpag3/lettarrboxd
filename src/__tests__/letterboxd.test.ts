@@ -31,7 +31,7 @@ jest.mock('./logger', () => ({
   default: mockLogger
 }));
 
-import { getWatchlistMovies } from './letterboxd';
+import { getWatchlistMovies } from '../letterboxd';
 
 describe('letterboxd module', () => {
   beforeEach(() => {
