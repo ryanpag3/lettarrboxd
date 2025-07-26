@@ -24,7 +24,7 @@ Lettarrboxd is a TypeScript Node.js application that automatically syncs Letterb
 The application uses Zod for strict environment variable validation in `src/env.ts`. All environment variables are validated at startup and the application will exit with detailed error messages if validation fails.
 
 Required variables:
-- `LETTERBOXD_USERNAME` - Letterboxd username for watchlist scraping
+- `LETTERBOXD_URL` - Letterboxd list URL for scraping (supports watchlists, regular lists, watched movies, filmographies, collections, etc.)
 - `RADARR_API_URL` - Base URL of Radarr instance  
 - `RADARR_API_KEY` - Radarr API key
 - `RADARR_QUALITY_PROFILE` - Quality profile name (case-sensitive)

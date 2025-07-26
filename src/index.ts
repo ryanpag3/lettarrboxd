@@ -1,40 +1,33 @@
 require('dotenv').config();
 
-import env from './env';
-import logger from './logger';
-import { processWatchlist } from './lettarrboxd';
+
+import schedule from 'node-schedule';
+import env from './util/env';
+import logger from './util/logger';
+import { fetchMoviesFromUrl } from './scraper';
+import { upsertMovies } from './api/radarr';
 
 function startScheduledMonitoring(): void {
-  const intervalMinutes = env.CHECK_INTERVAL_MINUTES;
-  const intervalMs = intervalMinutes * 60 * 1000;
+  const rule = new schedule.RecurrenceRule();
+  rule.minute = env.CHECK_INTERVAL_MINUTES;
 
-  logger.info(`Starting scheduled monitoring every ${intervalMinutes} minutes`);
-  logger.info(`Next check will be at: ${new Date(Date.now() + intervalMs).toISOString()}`);
+  run();
 
-  processWatchlist();
+  schedule.scheduleJob(rule, async () => {
+    await run();
+  });
+}
 
-  setInterval(() => {
-    logger.debug(`\n--- Scheduled check triggered (interval: ${intervalMinutes} minutes) ---`);
-    processWatchlist();
-  }, intervalMs);
+async function run() {
+  const movies = await fetchMoviesFromUrl(env.LETTERBOXD_URL);
+  await upsertMovies(movies);
 }
 
 export async function main() {
-  logger.info('Lettarrboxd starting...');
-  logger.info(`
-    - Check interval: ${env.CHECK_INTERVAL_MINUTES}
-    - Letterboxd user: ${env.LETTERBOXD_USERNAME}
-    `);
-  if (env.LETTERBOXD_TAKE_AMOUNT || env.LETTERBOXD_TAKE_STRATEGY) {
-    logger.info(`
-    - Take amount: ${env.LETTERBOXD_TAKE_AMOUNT}
-    - Take strategy: ${env.LETTERBOXD_TAKE_STRATEGY}
-    `)
-  }
   startScheduledMonitoring();
 }
 
-export { processWatchlist, startScheduledMonitoring };
+export { startScheduledMonitoring };
 
 // Only run main if this file is executed directly
 if (require.main === module) {

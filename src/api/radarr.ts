@@ -1,6 +1,23 @@
 import Axios from 'axios';
-import env from './env';
-import logger from './logger';
+import env from '../util/env';
+import logger from '../util/logger';
+import { LetterboxdMovie } from '../scraper';
+import Bluebird from 'bluebird';
+
+interface RadarrMovie {
+    title: string;
+    qualityProfileId: number;
+    rootFolderPath: string;
+    tmdbId: number;
+    minimumAvailability: string;
+    monitored: boolean;
+    tags: number[];
+    addOptions: {
+        searchForMovie: boolean;
+    }
+}
+
+const TAG_NAME = 'letterboxd';
 
 const axios = Axios.create({
     baseURL: env.RADARR_API_URL,
@@ -12,13 +29,13 @@ const axios = Axios.create({
 export async function lookupMovieInRadarr(tmdbId: string): Promise<any> {
     try {
         logger.debug(`Looking up TMDB ID ${tmdbId} in Radarr...`);
-        
+
         const response = await axios.get(`/api/v3/movie/lookup/tmdb`, {
             params: {
                 tmdbId: tmdbId
             }
         });
-        
+
         logger.debug(`Radarr response for TMDB ID ${tmdbId}:`, response.data);
         return response.data;
     } catch (error) {
@@ -30,13 +47,13 @@ export async function lookupMovieInRadarr(tmdbId: string): Promise<any> {
 export async function checkMovieInRadarr(tmdbId: string): Promise<any> {
     try {
         logger.debug(`Checking if TMDB ID ${tmdbId} exists in Radarr...`);
-        
+
         const response = await axios.get('/api/v3/movie', {
             params: {
                 tmdbId: tmdbId
             }
         });
-        
+
         logger.debug(`Radarr library check for TMDB ID ${tmdbId}:`, response.data);
         return response.data;
     } catch (error) {
@@ -48,10 +65,10 @@ export async function checkMovieInRadarr(tmdbId: string): Promise<any> {
 export async function getQualityProfileId(profileName: string): Promise<number | null> {
     try {
         logger.debug(`Getting quality profile ID for: ${profileName}`);
-        
+
         const response = await axios.get('/api/v3/qualityprofile');
         const profiles = response.data;
-        
+
         const profile = profiles.find((p: any) => p.name === profileName);
         if (profile) {
             logger.debug(`Found quality profile: ${profileName} (ID: ${profile.id})`);
@@ -71,7 +88,7 @@ export async function getRootFolder(): Promise<string | null> {
     try {
         const response = await axios.get('/api/v3/rootfolder');
         const rootFolders = response.data;
-        
+
         if (rootFolders.length > 0) {
             const rootFolder = rootFolders[0].path;
             logger.debug(`Using root folder: ${rootFolder}`);
@@ -104,21 +121,21 @@ export async function getRootFolderById(id: string) {
 export async function getOrCreateTag(tagName: string): Promise<number | null> {
     try {
         logger.debug(`Getting or creating tag: ${tagName}`);
-        
+
         const response = await axios.get('/api/v3/tag');
         const tags = response.data;
-        
+
         const existingTag = tags.find((tag: any) => tag.label === tagName);
         if (existingTag) {
             logger.debug(`Tag already exists: ${tagName} (ID: ${existingTag.id})`);
             return existingTag.id;
         }
-        
+
         logger.debug(`Creating new tag: ${tagName}`);
         const createResponse = await axios.post('/api/v3/tag', {
             label: tagName
         });
-        
+
         logger.info(`Created tag: ${tagName} (ID: ${createResponse.data.id})`);
         return createResponse.data.id;
     } catch (error) {
@@ -127,49 +144,61 @@ export async function getOrCreateTag(tagName: string): Promise<number | null> {
     }
 }
 
-export async function addMovie(tmdbId: string, movieData: any): Promise<any> {
+export async function upsertMovies(movies: LetterboxdMovie[]): Promise<void> {
+    const qualityProfileId = await getQualityProfileId(env.RADARR_QUALITY_PROFILE);
+
+    if (!qualityProfileId) {
+        throw new Error('Could not get quality profile ID.');
+    }
+
+    const rootFolderPath = !env.RADARR_ROOT_FOLDER_ID ? await getRootFolder() : await getRootFolderById(env.RADARR_ROOT_FOLDER_ID);
+    
+    if (!rootFolderPath) {
+        throw new Error('Could not get root folder');
+    }
+
+    const tagId = await getOrCreateTag(TAG_NAME);
+
+    if (!tagId) {
+        throw new Error('Could not get tag ID.');
+    }
+
+    await Bluebird.map(movies, movie => {
+        return addMovie(movie, qualityProfileId, rootFolderPath, tagId, env.RADARR_MINIMUM_AVAILABILITY);
+    });
+}
+
+export async function addMovie(movie: LetterboxdMovie, qualityProfileId: number, rootFolderPath: string, tagId: number, minimumAvailability: string): Promise<void> {
     try {
-        if (!movieData) {
-            logger.error(`No movie data provided for TMDB ID: ${tmdbId}`);
-            return null;
+        logger.debug(`Adding movie to Radarr: ${movie.name}`);
+
+        if (!movie.tmdbId) {
+            logger.info(`Could not add movie ${movie.name} because no tmdb id was found. Is this a TV show?`);
+            return;
         }
-        
-        logger.debug(`Adding movie to Radarr: ${movieData.title} (TMDB: ${tmdbId})`);
-        
-        const qualityProfileId = await getQualityProfileId(env.RADARR_QUALITY_PROFILE);
-        if (!qualityProfileId) {
-            throw new Error(`Could not find quality profile: ${env.RADARR_QUALITY_PROFILE}`);
-        }
-        
-        const rootFolderPath = !env.RADARR_ROOT_FOLDER_ID ? await getRootFolder() : await getRootFolderById(env.RADARR_ROOT_FOLDER_ID);
-        if (!rootFolderPath) {
-            throw new Error('Could not get root folder');
-        }
-        
-        const tagId = await getOrCreateTag('letterboxd-watchlist');
-        const tags = tagId ? [tagId] : [];
-        
-        const addMoviePayload = {
-            title: movieData.title,
-            qualityProfileId: qualityProfileId,
-            rootFolderPath: rootFolderPath,
-            tmdbId: parseInt(tmdbId),
-            minimumAvailability: env.RADARR_MINIMUM_AVAILABILITY,
+
+        const payload: RadarrMovie = {
+            title: movie.name,
+            qualityProfileId,
+            rootFolderPath,
+            tmdbId: parseInt(movie.tmdbId),
+            minimumAvailability,
             monitored: true,
-            tags: tags,
+            tags: [tagId],
             addOptions: {
                 searchForMovie: true
             }
-        };
-        
-        logger.debug('Adding movie with payload:', addMoviePayload);
-        
-        const response = await axios.post('/api/v3/movie', addMoviePayload);
-        
-        logger.info(`Successfully added movie: ${movieData.title}`, response.data);
+        }
+
+        const response = await axios.post('/api/v3/movie', payload);
+
+        logger.info(`Successfully added movie: ${payload.title}`, response.data);
         return response.data;
-    } catch (error) {
-        logger.error(`Error adding movie ${movieData.title} (TMDB: ${tmdbId}):`, error);
-        return null;
+    } catch (e: any) {
+        if (e.response?.status === 400 && (JSON.stringify(e.response?.data)).includes('This movie has already been added')) {
+            logger.debug(`Movie ${movie.name} already exists in Radarr, skipping`);
+            return;
+        }
+        logger.error(`Error adding movie ${movie.name} (TMDB: ${movie.tmdbId}):`, e);
     }
 }
