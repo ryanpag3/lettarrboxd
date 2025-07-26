@@ -6,6 +6,36 @@ Automatically sync your Letterboxd lists to Radarr for seamless movie management
 
 Lettarrboxd is an application that monitors your Letterboxd lists (watchlists, regular lists, watched movies, filmographies, collections, etc.) and automatically pushes new movies to Radarr. It runs continuously, checking for updates at configurable intervals and only processing new additions to avoid duplicate API calls.
 
+## Supported Letterboxd URLs
+
+The application supports various types of Letterboxd URLs for the `LETTERBOXD_URL` environment variable:
+
+### Currently Supported
+- **Watchlists**: `https://letterboxd.com/username/watchlist/`
+- **Regular Lists**: `https://letterboxd.com/username/list/list-name/`
+
+### Planned Support (Coming Soon)
+- **Watched Movies**: `https://letterboxd.com/username/films/`
+- **Actor Filmography**: `https://letterboxd.com/actor/actor-name/`
+- **Director Filmography**: `https://letterboxd.com/director/director-name/`
+- **Writer Filmography**: `https://letterboxd.com/writer/writer-name/`
+- **Collections**: `https://letterboxd.com/films/in/collection-name/`
+- **Popular Movies**: `https://letterboxd.com/films/popular/`
+
+### Examples
+```bash
+# User's watchlist
+LETTERBOXD_URL=https://letterboxd.com/moviefan123/watchlist/
+
+# User's custom list
+LETTERBOXD_URL=https://letterboxd.com/dave/list/official-top-250-narrative-feature-films/
+
+# Another user's list
+LETTERBOXD_URL=https://letterboxd.com/criterion/list/the-criterion-collection/
+```
+
+**Note**: All Letterboxd lists must be public for the application to access them.
+
 ## Quick Start
 
 ### Docker
