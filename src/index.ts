@@ -8,13 +8,12 @@ import { fetchMoviesFromUrl } from './scraper';
 import { upsertMovies } from './api/radarr';
 
 function startScheduledMonitoring(): void {
-
   const rule = new schedule.RecurrenceRule();
   rule.minute = env.CHECK_INTERVAL_MINUTES;
 
   run();
 
-  const job = schedule.scheduleJob(rule, async () => {
+  schedule.scheduleJob(rule, async () => {
     await run();
   });
 }
