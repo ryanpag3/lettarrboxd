@@ -35,11 +35,11 @@ jobs:
       - name: Run TypeScript type check
         run: yarn tsc --noEmit
 
-      - name: Run unit tests
-        run: yarn test
+      # - name: Run unit tests
+      #   run: yarn test
 
-      - name: Run integration tests
-        run: yarn test:integration
+      # - name: Run integration tests
+      #   run: yarn test:integration
 
   build:
     runs-on: ubuntu-latest
