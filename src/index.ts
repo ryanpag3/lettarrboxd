@@ -3,12 +3,14 @@ require('dotenv').config();
 import env from './util/env';
 import logger from './util/logger';
 import { fetchMoviesFromUrl } from './scraper';
+import { upsertMovies } from './api/radarr';
 
 function startScheduledMonitoring(): void {
   const intervalMinutes = env.CHECK_INTERVAL_MINUTES;
   const intervalMs = intervalMinutes * 60 * 1000;
-  setInterval(() => {
-    fetchMoviesFromUrl(env.LETTERBOXD_URL);
+  setInterval(async () => {
+    const movies = await fetchMoviesFromUrl(env.LETTERBOXD_URL);
+    await upsertMovies(movies);
   }, intervalMs);
 }
 

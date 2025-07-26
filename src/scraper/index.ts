@@ -1,4 +1,3 @@
-import { getWatchlistMovies } from "./watchlist.old";
 import * as Watchlist from './watchlist';
 
 export interface LetterboxdMovie {
