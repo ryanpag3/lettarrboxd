@@ -1,4 +1,4 @@
-import * as Watchlist from './watchlist';
+import { WatchlistScraper } from './watchlist';
 
 export interface LetterboxdMovie {
     id: number;
@@ -51,7 +51,8 @@ export const fetchMoviesFromUrl = async (url: string): Promise<LetterboxdMovie[]
   
   switch (listType) {
     case ListType.WATCHLIST:
-      return Watchlist.getMovies(url);
+      const watchlistScraper = new WatchlistScraper(url);
+      return watchlistScraper.getMovies();
       
     case ListType.REGULAR_LIST:
       // TODO: Implement regular list scraping
