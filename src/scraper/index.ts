@@ -1,3 +1,13 @@
+import { getWatchlistMovies } from "./watchlist.old";
+import * as Watchlist from './watchlist';
+
+export interface LetterboxdMovie {
+    id: number;
+    name: string;
+    imdbId: string;
+    tmdbId: string;
+}
+
 export enum ListType {
   WATCHLIST = 'watchlist',
   REGULAR_LIST = 'regular_list',
@@ -8,6 +18,8 @@ export enum ListType {
   COLLECTIONS = 'collections',
   POPULAR_MOVIES = 'popular_movies'
 }
+
+export const LETTERBOXD_BASE_URL = 'https://letterboxd.com';
 
 const URL_PATTERNS = {
   [ListType.WATCHLIST]: /^https:\/\/letterboxd\.com\/[^\/]+\/watchlist\/?$/,
@@ -29,7 +41,7 @@ export const detectListType = (url: string): ListType | null => {
   return null;
 };
 
-export const fetchMoviesFromUrl = async (url: string) => {
+export const fetchMoviesFromUrl = async (url: string): Promise<LetterboxdMovie[]> => {
   const listType = detectListType(url);
   
   if (!listType) {
@@ -38,8 +50,7 @@ export const fetchMoviesFromUrl = async (url: string) => {
   
   switch (listType) {
     case ListType.WATCHLIST:
-      // TODO: Implement watchlist scraping
-      throw new Error('Watchlist scraping not implemented');
+      return Watchlist.getMovies(url);
       
     case ListType.REGULAR_LIST:
       // TODO: Implement regular list scraping

@@ -53,13 +53,13 @@ async function getTmdbIdFromMoviePage(url: string): Promise<string | null> {
     }
 }
 
-async function getAllWatchlistUrls(): Promise<string[]> {
+async function getAllWatchlistUrls(url: string): Promise<string[]> {
     const allUrls: string[] = [];
     let page = 1;
     let hasMorePages = true;
     
     while (hasMorePages) {
-        const watchListUrl = `https://letterboxd.com/${env.LETTERBOXD_URL.split('/')[3]}/watchlist/page/${page}/`;
+        const watchListUrl = `${url}/page/${page}/`;
         logger.debug(`Fetching page ${page}: ${watchListUrl}`);
         
         try {
@@ -112,8 +112,8 @@ function applyMovieLimiting(urls: string[]): string[] {
     return urls;
 }
 
-export async function getWatchlistMovies(): Promise<Movie[]> {
-    const urls = await getAllWatchlistUrls();
+export async function getWatchlistMovies(url: string): Promise<Movie[]> {
+    const urls = await getAllWatchlistUrls(url);
     
     logger.info('Total movies found across all pages:', urls.length);
     
