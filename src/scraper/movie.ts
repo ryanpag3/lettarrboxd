@@ -9,8 +9,6 @@ import logger from '../util/logger';
 export async function getMovie(link: string): Promise<LetterboxdMovie> {
     const movieUrl = new URL(link, LETTERBOXD_BASE_URL).toString();
     
-    logger.info(movieUrl);
-
     const response = await fetch(movieUrl);
     if (!response.ok) {
         throw new Error(`Failed to fetch movie page: ${response.status} ${response.statusText}`);
@@ -38,13 +36,11 @@ function extractMovieFromHtml(slug: string, html: string): LetterboxdMovie {
         slug
     };
 
-    logger.debug(`Got movie details.`, letterboxdResult);
-
     return letterboxdResult;
 }
 
 function extractName($: cheerio.CheerioAPI): string {
-    const name = $('.name').text();
+    const name = $('.primaryname').first().text().trim();
     return name;
 }
 

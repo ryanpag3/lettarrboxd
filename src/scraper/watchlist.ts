@@ -1,21 +1,24 @@
 import * as cheerio from 'cheerio';
+import Bluebird from 'bluebird';
 import { LetterboxdMovie, LETTERBOXD_BASE_URL } from ".";
 import { getMovie } from './movie';
 import logger from '../util/logger';
 
-export async function getMovies(url: string): Promise<LetterboxdMovie[]> {
-    const allMovieLinks = await getAllMovieLinks(url);
-    const movies: LetterboxdMovie[] = [];
+export async function getMovies(url: string, take?: number | 'oldest'): Promise<LetterboxdMovie[]> {
+    let processUrl = url;
     
-    for (const link of allMovieLinks) {
-        try {
-            await new Promise(resolve => setTimeout(resolve, 500));
-            const movie = await getMovie(link);
-            movies.push(movie);
-        } catch (error) {
-            console.warn(`Failed to fetch movie ${link}:`, error);
-        }
+    if (take === 'oldest') {
+        processUrl = url.replace(/\/$/, '') + '/by/date-earliest/';
     }
+    
+    const allMovieLinks = await getAllMovieLinks(processUrl);
+    const linksToProcess = typeof take === 'number' ? allMovieLinks.slice(0, take) : allMovieLinks;
+
+    const movies = await Bluebird.map(linksToProcess, link => {
+        return getMovie(link);
+    }, {
+        concurrency: 10
+    });
     
     return movies;
 }
