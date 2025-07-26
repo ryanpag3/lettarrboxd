@@ -5,7 +5,9 @@ export interface LetterboxdMovie {
     id: number;
     name: string;
     imdbId: string;
-    tmdbId: string;
+    tmdbId?: string;
+    publishedYear: number;
+    slug: string;
 }
 
 export enum ListType {

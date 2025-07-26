@@ -14,10 +14,10 @@ export async function getMovie(link: string): Promise<LetterboxdMovie> {
     }
     
     const html = await response.text();
-    return extractMovieFromHtml(html);
+    return extractMovieFromHtml(link, html);
 }
 
-function extractMovieFromHtml(html: string): LetterboxdMovie {
+function extractMovieFromHtml(slug: string, html: string): LetterboxdMovie {
     const $ = cheerio.load(html);
     
     const jsonLdScript = $('script[type="application/ld+json"]').first().html();
@@ -35,12 +35,15 @@ function extractMovieFromHtml(html: string): LetterboxdMovie {
     const tmdbId = extractTmdbId($);
     const imdbId = extractImdbId(movieData);
     const id = extractLetterboxdId($);
+    const year = extractPublishedYear($);
     
     return {
         id,
         name,
         imdbId,
-        tmdbId
+        tmdbId,
+        publishedYear: year,
+        slug
     };
 }
 
@@ -79,4 +82,16 @@ function extractLetterboxdId($: cheerio.CheerioAPI): number {
     }
     
     return parseInt(filmId, 10);
+}
+
+function extractPublishedYear($: cheerio.CheerioAPI): number {
+    const releaseYear = $('.release-year').text().trim();
+    if (releaseYear) {
+        const year = parseInt(releaseYear, 10);
+        if (!isNaN(year)) {
+            return year;
+        }
+    }
+    
+    throw new Error('Could not extract published year');
 }

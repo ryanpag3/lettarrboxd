@@ -1,6 +1,7 @@
 import Axios from 'axios';
 import env from '../util/env';
 import logger from '../util/logger';
+import { LetterboxdMovie } from '../scraper';
 
 const axios = Axios.create({
     baseURL: env.RADARR_API_URL,
@@ -127,7 +128,7 @@ export async function getOrCreateTag(tagName: string): Promise<number | null> {
     }
 }
 
-export async function addMovie(tmdbId: string, movieData: any): Promise<any> {
+export async function addMovieOld(tmdbId: string, movieData: any): Promise<any> {
     try {
         if (!movieData) {
             logger.error(`No movie data provided for TMDB ID: ${tmdbId}`);
@@ -172,4 +173,12 @@ export async function addMovie(tmdbId: string, movieData: any): Promise<any> {
         logger.error(`Error adding movie ${movieData.title} (TMDB: ${tmdbId}):`, error);
         return null;
     }
+}
+
+export async function upsertMovies(movies: LetterboxdMovie[]): Promise<void> {
+
+}
+
+export async function addMovie(movie: LetterboxdMovie): Promise<void> {
+    
 }
