@@ -21,6 +21,4 @@ services:
       # Optional movie limiting (both required if using)
       # - LETTERBOXD_TAKE_AMOUNT=10
       # - LETTERBOXD_TAKE_STRATEGY=newest
-    volumes:
-      - ./data:/data
     restart: unless-stopped
