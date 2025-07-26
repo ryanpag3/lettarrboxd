@@ -59,7 +59,7 @@ async function getAllWatchlistUrls(): Promise<string[]> {
     let hasMorePages = true;
     
     while (hasMorePages) {
-        const watchListUrl = `https://letterboxd.com/${env.LETTERBOXD_USERNAME}/watchlist/page/${page}/`;
+        const watchListUrl = `https://letterboxd.com/${env.LETTERBOXD_URL.split('/')[3]}/watchlist/page/${page}/`;
         logger.debug(`Fetching page ${page}: ${watchListUrl}`);
         
         try {

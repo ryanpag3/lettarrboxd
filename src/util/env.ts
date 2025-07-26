@@ -3,7 +3,7 @@ import { z } from 'zod';
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   LOG_LEVEL: z.enum(['error', 'warn', 'info', 'debug']).default('info'),
-  LETTERBOXD_USERNAME: z.string(),
+  LETTERBOXD_URL: z.string().url(),
   RADARR_API_URL: z.string(),
   RADARR_API_KEY: z.string(),
   RADARR_QUALITY_PROFILE: z.string(),

@@ -1,10 +1,10 @@
 # Lettarrboxd
 
-Automatically sync your Letterboxd watchlist to Radarr for seamless movie management.
+Automatically sync your Letterboxd lists to Radarr for seamless movie management.
 
 ## Overview
 
-Lettarrboxd is an application that monitors your Letterboxd watchlist and automatically pushes new movies to Radarr. It runs continuously, checking for updates at configurable intervals and only processing new additions to avoid duplicate API calls.
+Lettarrboxd is an application that monitors your Letterboxd lists (watchlists, regular lists, watched movies, filmographies, collections, etc.) and automatically pushes new movies to Radarr. It runs continuously, checking for updates at configurable intervals and only processing new additions to avoid duplicate API calls.
 
 ## Quick Start
 
@@ -13,7 +13,7 @@ Lettarrboxd is an application that monitors your Letterboxd watchlist and automa
 ```bash
 docker run -d \
   --name lettarrboxd \
-  -e LETTERBOXD_USERNAME=your_username \
+  -e LETTERBOXD_URL=https://letterboxd.com/your_username/watchlist/ \
   -e RADARR_API_URL=http://your-radarr:7878 \
   -e RADARR_API_KEY=your_api_key \
   -e RADARR_QUALITY_PROFILE="HD-1080p" \
@@ -27,7 +27,7 @@ See [docker-compose.yaml](./docker-compose.yaml) for complete example.
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `LETTERBOXD_USERNAME` | Your Letterboxd username | `moviefan123` |
+| `LETTERBOXD_URL` | Your Letterboxd list URL | `https://letterboxd.com/moviefan123/watchlist/` |
 | `RADARR_API_URL` | Radarr base URL | `http://radarr:7878` |
 | `RADARR_API_KEY` | Radarr API key | `abc123...` |
 | `RADARR_QUALITY_PROFILE` | Quality profile name in Radarr | `HD-1080p` |
@@ -98,7 +98,7 @@ When `NODE_ENV=development`, the application:
 **Movies not being added**
 - Verify your Radarr API key and URL are correct
 - Check that the quality profile name matches exactly (case-sensitive)
-- Ensure your Letterboxd profile is public
+- Ensure your Letterboxd list is public
 
 **Docker container won't start**
 - Verify all required environment variables are set
