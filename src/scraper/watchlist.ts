@@ -25,7 +25,7 @@ async function getAllMovieLinks(baseUrl: string): Promise<string[]> {
     const allLinks: string[] = [];
     
     while (currentUrl) {
-        console.log(`Fetching page: ${currentUrl}`);
+        logger.debug(`Fetching page: ${currentUrl}`);
         
         const response = await fetch(currentUrl);
         if (!response.ok) {
