@@ -5,7 +5,7 @@ import { getMovie } from './movie';
 import logger from '../util/logger';
 import Scraper from './scraper.interface';
 
-export class WatchlistScraper implements Scraper {
+export class ListScraper implements Scraper {
     constructor(private url: string, private take?: number | 'oldest') {}
 
     async getMovies(): Promise<LetterboxdMovie[]> {
@@ -36,7 +36,7 @@ export class WatchlistScraper implements Scraper {
             
             const response = await fetch(currentUrl);
             if (!response.ok) {
-                throw new Error(`Failed to fetch watchlist page: ${response.status}`);
+                throw new Error(`Failed to fetch list page: ${response.status}`);
             }
             
             const html = await response.text();
@@ -50,7 +50,7 @@ export class WatchlistScraper implements Scraper {
             }
         }
         
-        logger.debug(`Retrieved ${allLinks.length} links from letterboxd.`);
+        logger.debug(`Retrieved ${allLinks.length} links from letterboxd list.`);
 
         return allLinks;
     }

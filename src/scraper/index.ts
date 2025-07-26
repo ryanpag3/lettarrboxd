@@ -1,4 +1,4 @@
-import { WatchlistScraper } from './watchlist';
+import { ListScraper } from './list';
 
 export interface LetterboxdMovie {
     id: number;
@@ -51,12 +51,9 @@ export const fetchMoviesFromUrl = async (url: string): Promise<LetterboxdMovie[]
   
   switch (listType) {
     case ListType.WATCHLIST:
-      const watchlistScraper = new WatchlistScraper(url);
-      return watchlistScraper.getMovies();
-      
     case ListType.REGULAR_LIST:
-      // TODO: Implement regular list scraping
-      throw new Error('Regular list scraping not implemented');
+      const listScraper = new ListScraper(url);
+      return listScraper.getMovies();
       
     case ListType.WATCHED_MOVIES:
       // TODO: Implement watched movies scraping
