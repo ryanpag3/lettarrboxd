@@ -4,7 +4,7 @@ services:
     container_name: lettarrboxd
     environment:
       # Required variables
-      - LETTERBOXD_USERNAME=your_username
+      - LETTERBOXD_URL=https://letterboxd.com/your_username/watchlist/
       - RADARR_API_URL=http://radarr:7878
       - RADARR_API_KEY=your_api_key
       - RADARR_QUALITY_PROFILE=HD-1080p
@@ -14,7 +14,9 @@ services:
       - LOG_LEVEL=info
       - CHECK_INTERVAL_MINUTES=60
       - RADARR_MINIMUM_AVAILABILITY=released
-      - DATA_DIR=/data
+      
+      # Optional root folder ID (if not specified, uses first available)
+      # - RADARR_ROOT_FOLDER_ID=1
       
       # Optional movie limiting (both required if using)
       # - LETTERBOXD_TAKE_AMOUNT=10
