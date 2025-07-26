@@ -1,6 +1,7 @@
 import * as cheerio from 'cheerio';
 import { LetterboxdMovie, LETTERBOXD_BASE_URL } from ".";
 import { getMovie } from './movie';
+import logger from '../util/logger';
 
 export async function getMovies(url: string): Promise<LetterboxdMovie[]> {
     const allMovieLinks = await getAllMovieLinks(url);
@@ -42,6 +43,8 @@ async function getAllMovieLinks(baseUrl: string): Promise<string[]> {
         }
     }
     
+    logger.debug(`Retrieved ${allLinks.length} links from letterboxd.`);
+
     return allLinks;
 }
 
@@ -50,12 +53,12 @@ function getMovieLinksFromHtml(html: string): string[] {
     const links: string[] = [];
     
     $('.film-poster').each((_, element) => {
-        const filmLink = $(element).attr('data-film-link');
+        const filmLink = $(element).attr('data-target-link');
         if (filmLink) {
             links.push(filmLink);
         }
     });
-    
+    logger.debug(`Found ${links.length} links.`);
     return links;
 }
 

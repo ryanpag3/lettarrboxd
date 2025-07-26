@@ -8,10 +8,17 @@ import { upsertMovies } from './api/radarr';
 function startScheduledMonitoring(): void {
   const intervalMinutes = env.CHECK_INTERVAL_MINUTES;
   const intervalMs = intervalMinutes * 60 * 1000;
+
+  run();
+
   setInterval(async () => {
-    const movies = await fetchMoviesFromUrl(env.LETTERBOXD_URL);
-    await upsertMovies(movies);
+    await run();
   }, intervalMs);
+}
+
+async function run() {
+  const movies = await fetchMoviesFromUrl(env.LETTERBOXD_URL);
+  await upsertMovies(movies);
 }
 
 export async function main() {

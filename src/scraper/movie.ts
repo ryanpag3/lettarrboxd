@@ -1,5 +1,6 @@
 import * as cheerio from 'cheerio';
 import { LETTERBOXD_BASE_URL, LetterboxdMovie } from ".";
+import logger from '../util/logger';
 
 /**
  * Obtain details of a movie.
@@ -8,6 +9,8 @@ import { LETTERBOXD_BASE_URL, LetterboxdMovie } from ".";
 export async function getMovie(link: string): Promise<LetterboxdMovie> {
     const movieUrl = new URL(link, LETTERBOXD_BASE_URL).toString();
     
+    logger.info(movieUrl);
+
     const response = await fetch(movieUrl);
     if (!response.ok) {
         throw new Error(`Failed to fetch movie page: ${response.status} ${response.statusText}`);
@@ -20,24 +23,13 @@ export async function getMovie(link: string): Promise<LetterboxdMovie> {
 function extractMovieFromHtml(slug: string, html: string): LetterboxdMovie {
     const $ = cheerio.load(html);
     
-    const jsonLdScript = $('script[type="application/ld+json"]').first().html();
-    if (!jsonLdScript) {
-        throw new Error('Could not find JSON-LD structured data');
-    }
-    
-    const movieData = JSON.parse(jsonLdScript);
-    
-    const name = movieData.name;
-    if (!name) {
-        throw new Error('Could not extract movie name');
-    }
-    
+    const name = extractName($);
     const tmdbId = extractTmdbId($);
-    const imdbId = extractImdbId(movieData);
+    const imdbId = extractImdbId($);
     const id = extractLetterboxdId($);
     const year = extractPublishedYear($);
     
-    return {
+    const letterboxdResult = {
         id,
         name,
         imdbId,
@@ -45,10 +37,19 @@ function extractMovieFromHtml(slug: string, html: string): LetterboxdMovie {
         publishedYear: year,
         slug
     };
+
+    logger.debug(`Got movie details.`, letterboxdResult);
+
+    return letterboxdResult;
+}
+
+function extractName($: cheerio.CheerioAPI): string {
+    const name = $('.name').text();
+    return name;
 }
 
 function extractTmdbId($: cheerio.CheerioAPI): string {
-    const tmdbLink = $('a[data-track-action="TMDb"]').attr('href');
+    const tmdbLink = $('a[data-track-action="TMDB"]').attr('href');
     if (!tmdbLink) {
         throw new Error('Could not find TMDB link');
     }
@@ -61,22 +62,22 @@ function extractTmdbId($: cheerio.CheerioAPI): string {
     return tmdbMatch[1];
 }
 
-function extractImdbId(movieData: any): string {
-    const imdbUrl = movieData.sameAs?.find((url: string) => url.includes('imdb.com'));
-    if (!imdbUrl) {
-        throw new Error('Could not find IMDB URL in structured data');
+function extractImdbId($: cheerio.CheerioAPI): string {
+    const imdbLink = $('a[href*="imdb.com"]').attr('href');
+    if (!imdbLink) {
+        throw new Error('Could not find IMDB link');
     }
     
-    const imdbMatch = imdbUrl.match(/\/title\/(tt\d+)/);
+    const imdbMatch = imdbLink.match(/\/title\/(tt\d+)/);
     if (!imdbMatch) {
-        throw new Error('Could not extract IMDB ID from URL');
+        throw new Error('Could not extract IMDB ID from link');
     }
     
     return imdbMatch[1];
 }
 
 function extractLetterboxdId($: cheerio.CheerioAPI): number {
-    const filmId = $('body').attr('data-film-id');
+    const filmId = $('.film-poster').attr('data-film-id');
     if (!filmId) {
         throw new Error('Could not find Letterboxd film ID');
     }
@@ -85,11 +86,11 @@ function extractLetterboxdId($: cheerio.CheerioAPI): number {
 }
 
 function extractPublishedYear($: cheerio.CheerioAPI): number {
-    const releaseYear = $('.release-year').text().trim();
-    if (releaseYear) {
-        const year = parseInt(releaseYear, 10);
-        if (!isNaN(year)) {
-            return year;
+    const releaseDateLink = $('span.releasedate a').attr('href');
+    if (releaseDateLink) {
+        const yearMatch = releaseDateLink.match(/\/(\d{4})\//);
+        if (yearMatch) {
+            return parseInt(yearMatch[1], 10);
         }
     }
     
