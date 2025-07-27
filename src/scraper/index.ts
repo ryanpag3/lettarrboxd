@@ -4,7 +4,7 @@ export interface LetterboxdMovie {
     id: number;
     name: string;
     imdbId: string;
-    tmdbId?: string;
+    tmdbId?: string|null;
     publishedYear: number;
     slug: string;
 }

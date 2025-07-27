@@ -44,15 +44,17 @@ function extractName($: cheerio.CheerioAPI): string {
     return name;
 }
 
-function extractTmdbId($: cheerio.CheerioAPI): string {
+function extractTmdbId($: cheerio.CheerioAPI): string|null {
     const tmdbLink = $('a[data-track-action="TMDB"]').attr('href');
     if (!tmdbLink) {
-        throw new Error('Could not find TMDB link');
+        logger.debug('Could not find TMDB link. This could happen if there is a TV show in the list.');
+        return null;
     }
     
     const tmdbMatch = tmdbLink.match(/\/movie\/(\d+)/);
     if (!tmdbMatch) {
-        throw new Error('Could not extract TMDB ID from link');
+        logger.debug('Could not extract TMDB ID from link. This could happen because there is a TV show in the list.');
+        return null;
     }
     
     return tmdbMatch[1];
