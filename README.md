@@ -47,6 +47,19 @@ docker run -d \
   -e RADARR_API_URL=http://your-radarr:7878 \
   -e RADARR_API_KEY=your_api_key \
   -e RADARR_QUALITY_PROFILE="HD-1080p" \
+  -e DRY_RUN=false \
+  ryanpage/lettarrboxd:latest
+```
+
+For testing purposes, you can enable dry run mode:
+```bash
+docker run -d \
+  --name lettarrboxd-test \
+  -e LETTERBOXD_URL=https://letterboxd.com/your_username/watchlist/ \
+  -e RADARR_API_URL=http://your-radarr:7878 \
+  -e RADARR_API_KEY=your_api_key \
+  -e RADARR_QUALITY_PROFILE="HD-1080p" \
+  -e DRY_RUN=true \
   ryanpage/lettarrboxd:latest
 ```
 See [docker-compose.yaml](./docker-compose.yaml) for complete example.
@@ -71,6 +84,7 @@ See [docker-compose.yaml](./docker-compose.yaml) for complete example.
 | `RADARR_ROOT_FOLDER_ID` | - | Specific root folder ID to use in Radarr (uses first available if not set) |
 | `LETTERBOXD_TAKE_AMOUNT` | - | Number of movies to sync (requires `LETTERBOXD_TAKE_STRATEGY`) |
 | `LETTERBOXD_TAKE_STRATEGY` | - | Movie selection strategy: `newest` or `oldest` (requires `LETTERBOXD_TAKE_AMOUNT`) |
+| `DRY_RUN` | `false` | When `true`, logs what would be added to Radarr without making actual API calls |
 | `DATA_DIR` | `/data` | Directory for storing application data. You generally do not need to worry about this. |
 
 ## Development
