@@ -190,6 +190,11 @@ export async function addMovie(movie: LetterboxdMovie, qualityProfileId: number,
             }
         }
 
+        if (env.DRY_RUN) {
+            logger.info(`[DRY RUN] Would add movie to Radarr: ${payload.title} (TMDB: ${payload.tmdbId})`, payload);
+            return;
+        }
+
         const response = await axios.post('/api/v3/movie', payload);
 
         logger.info(`Successfully added movie: ${payload.title}`, response.data);
