@@ -3,9 +3,9 @@ import { ListScraper } from './list';
 export interface LetterboxdMovie {
     id: number;
     name: string;
-    imdbId: string;
+    imdbId?: string|null;
     tmdbId?: string|null;
-    publishedYear: number;
+    publishedYear?: number|null;
     slug: string;
 }
 
