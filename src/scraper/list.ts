@@ -6,12 +6,12 @@ import logger from '../util/logger';
 import Scraper from './scraper.interface';
 
 export class ListScraper implements Scraper {
-    constructor(private url: string, private take?: number | 'oldest') {}
+    constructor(private url: string, private take?: number, private strategy?: 'oldest' | 'newest') {}
 
     async getMovies(): Promise<LetterboxdMovie[]> {
         let processUrl = this.url;
         
-        if (this.take === 'oldest') {
+        if (this.strategy === 'oldest') {
             processUrl = this.url.replace(/\/$/, '') + '/by/date-earliest/';
         }
         

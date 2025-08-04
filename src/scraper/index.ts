@@ -1,11 +1,12 @@
 import { ListScraper } from './list';
+import env from '../util/env';
 
 export interface LetterboxdMovie {
     id: number;
     name: string;
-    imdbId: string;
+    imdbId?: string|null;
     tmdbId?: string|null;
-    publishedYear: number;
+    publishedYear?: number|null;
     slug: string;
 }
 
@@ -52,7 +53,16 @@ export const fetchMoviesFromUrl = async (url: string): Promise<LetterboxdMovie[]
   switch (listType) {
     case ListType.WATCHLIST:
     case ListType.REGULAR_LIST:
-      const listScraper = new ListScraper(url);
+      // Determine take parameters from environment variables
+      let take: number | undefined = undefined;
+      let strategy: 'oldest' | 'newest' | undefined = undefined;
+      
+      if (env.LETTERBOXD_TAKE_AMOUNT && env.LETTERBOXD_TAKE_STRATEGY) {
+        take = env.LETTERBOXD_TAKE_AMOUNT;
+        strategy = env.LETTERBOXD_TAKE_STRATEGY;
+      }
+      
+      const listScraper = new ListScraper(url, take, strategy);
       return listScraper.getMovies();
       
     case ListType.WATCHED_MOVIES:

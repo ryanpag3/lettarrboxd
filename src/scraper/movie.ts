@@ -60,15 +60,17 @@ function extractTmdbId($: cheerio.CheerioAPI): string|null {
     return tmdbMatch[1];
 }
 
-function extractImdbId($: cheerio.CheerioAPI): string {
+function extractImdbId($: cheerio.CheerioAPI): string|null {
     const imdbLink = $('a[href*="imdb.com"]').attr('href');
     if (!imdbLink) {
-        throw new Error('Could not find IMDB link');
+        logger.debug('Could not find IMDB link. This could happen if there is a TV show in the list or the movie lacks IMDB data.');
+        return null;
     }
     
     const imdbMatch = imdbLink.match(/\/title\/(tt\d+)/);
     if (!imdbMatch) {
-        throw new Error('Could not extract IMDB ID from link');
+        logger.debug('Could not extract IMDB ID from link. This could happen because of an unexpected IMDB URL format.');
+        return null;
     }
     
     return imdbMatch[1];
@@ -83,7 +85,7 @@ function extractLetterboxdId($: cheerio.CheerioAPI): number {
     return parseInt(filmId, 10);
 }
 
-function extractPublishedYear($: cheerio.CheerioAPI): number {
+function extractPublishedYear($: cheerio.CheerioAPI): number|null {
     const releaseDateLink = $('span.releasedate a').attr('href');
     if (releaseDateLink) {
         const yearMatch = releaseDateLink.match(/\/(\d{4})\//);
@@ -92,5 +94,6 @@ function extractPublishedYear($: cheerio.CheerioAPI): number {
         }
     }
     
-    throw new Error('Could not extract published year');
+    logger.debug('Could not extract published year. This could happen if the release date format is unexpected or missing.');
+    return null;
 }
