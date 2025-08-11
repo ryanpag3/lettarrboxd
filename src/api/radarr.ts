@@ -170,7 +170,9 @@ export async function getAllRequiredTagIds(): Promise<number[]> {
             logger.warn(`Failed to create or retrieve tag: ${tagName}`);
         }
     }
-    
+    const tagIdPromises = tagNames.map(tagName => getOrCreateTag(tagName));
+    const tagIdsRaw = await Promise.all(tagIdPromises);
+    const tagIds = tagIdsRaw.filter((tagId): tagId is number => tagId !== null);
     return tagIds;
 }
 
