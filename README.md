@@ -47,6 +47,7 @@ docker run -d \
   -e RADARR_API_URL=http://your-radarr:7878 \
   -e RADARR_API_KEY=your_api_key \
   -e RADARR_QUALITY_PROFILE="HD-1080p" \
+  -e RADARR_TAGS="watchlist,must-watch" \
   -e DRY_RUN=false \
   ryanpage/lettarrboxd:latest
 ```
@@ -82,6 +83,7 @@ See [docker-compose.yaml](./docker-compose.yaml) for complete example.
 | `CHECK_INTERVAL_MINUTES` | `10` | How often to check for new movies (minimum 10) |
 | `RADARR_MINIMUM_AVAILABILITY` | `released` | When movie becomes available (`announced`, `inCinemas`, `released`) |
 | `RADARR_ROOT_FOLDER_ID` | - | Specific root folder ID to use in Radarr (uses first available if not set) |
+| `RADARR_TAGS` | - | Additional tags to apply to movies (comma-separated). Movies are always tagged with `letterboxd` |
 | `LETTERBOXD_TAKE_AMOUNT` | - | Number of movies to sync (requires `LETTERBOXD_TAKE_STRATEGY`) |
 | `LETTERBOXD_TAKE_STRATEGY` | - | Movie selection strategy: `newest` or `oldest` (requires `LETTERBOXD_TAKE_AMOUNT`) |
 | `DRY_RUN` | `false` | When `true`, logs what would be added to Radarr without making actual API calls |
