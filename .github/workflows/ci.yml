@@ -3,13 +3,14 @@ name: Build and Push Docker Image
 on:
   push:
     branches:
-      - master
-      - develop
+      - main
+      - 'feature/**'
+      - 'defect/**'
     tags:
       - 'v*'
   pull_request:
     branches:
-      - master
+      - main
   release:
     types: [published]
 
@@ -68,13 +69,12 @@ jobs:
         with:
           images: ${{ env.IMAGE_NAME }}
           tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
-            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/master' }}
-            type=raw,value={{tag}},enable=${{ github.event_name == 'release' }}
+            type=ref,event=branch,suffix=-{{sha}}
+            type=ref,event=pr,suffix=-{{sha}}
+            type=semver,pattern=v{{version}}
+            type=semver,pattern=v{{major}}.{{minor}}
+            type=semver,pattern=v{{major}}
+            type=raw,value=staging,enable=${{ github.ref == 'refs/heads/main' }}
             type=raw,value=latest,enable=${{ github.event_name == 'release' }}
 
       - name: Build and push Docker image
