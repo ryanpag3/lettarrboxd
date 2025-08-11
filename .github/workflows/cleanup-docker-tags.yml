@@ -1,0 +1,71 @@
+name: Cleanup Stale Docker Tags
+
+on:
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch: # Allow manual trigger
+
+env:
+  IMAGE_NAME: ryanpage/lettarrboxd
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    
+    steps:
+      - name: Cleanup old Docker tags
+        run: |
+          # Get all tags from Docker Hub
+          TAGS=$(curl -s "https://hub.docker.com/v2/repositories/${{ env.IMAGE_NAME }}/tags/?page_size=100" | \
+                 jq -r '.results[].name')
+          
+          # Current date for age comparison (30 days ago)
+          CUTOFF_DATE=$(date -d '30 days ago' +%s)
+          
+          echo "Found tags:"
+          echo "$TAGS"
+          
+          # Process each tag
+          for TAG in $TAGS; do
+            # Skip protected tags
+            if [[ "$TAG" =~ ^(latest|staging|v[0-9]+(\.[0-9]+)*|main-.{7})$ ]]; then
+              echo "Skipping protected tag: $TAG"
+              continue
+            fi
+            
+            # Delete old feature/defect branch tags (older than 30 days)
+            if [[ "$TAG" =~ ^(feature-|defect-) ]]; then
+              echo "Checking age of branch tag: $TAG"
+              TAG_DATE=$(curl -s "https://hub.docker.com/v2/repositories/${{ env.IMAGE_NAME }}/tags/$TAG/" | \
+                        jq -r '.last_updated' | \
+                        xargs -I {} date -d {} +%s 2>/dev/null || echo "0")
+              
+              if [[ "$TAG_DATE" -lt "$CUTOFF_DATE" ]] && [[ "$TAG_DATE" != "0" ]]; then
+                echo "Would delete old branch tag: $TAG (age: $((($CUTOFF_DATE - $TAG_DATE) / 86400)) days)"
+                # Uncomment to actually delete:
+                # curl -X DELETE -H "Authorization: Bearer ${{ secrets.DOCKERHUB_TOKEN }}" \
+                #   "https://hub.docker.com/v2/repositories/${{ env.IMAGE_NAME }}/tags/$TAG/"
+              fi
+            fi
+            
+            # Delete old PR tags (older than 7 days)  
+            if [[ "$TAG" =~ ^pr- ]]; then
+              echo "Checking age of PR tag: $TAG"
+              TAG_DATE=$(curl -s "https://hub.docker.com/v2/repositories/${{ env.IMAGE_NAME }}/tags/$TAG/" | \
+                        jq -r '.last_updated' | \
+                        xargs -I {} date -d {} +%s 2>/dev/null || echo "0")
+              
+              PR_CUTOFF=$(date -d '7 days ago' +%s)
+              if [[ "$TAG_DATE" -lt "$PR_CUTOFF" ]] && [[ "$TAG_DATE" != "0" ]]; then
+                echo "Would delete old PR tag: $TAG (age: $((($PR_CUTOFF - $TAG_DATE) / 86400)) days)"
+                # Uncomment to actually delete:
+                # curl -X DELETE -H "Authorization: Bearer ${{ secrets.DOCKERHUB_TOKEN }}" \
+                #   "https://hub.docker.com/v2/repositories/${{ env.IMAGE_NAME }}/tags/$TAG/"
+              fi
+            fi
+          done
+          
+          echo "Cleanup dry-run completed. Uncomment delete commands to enable actual cleanup."
