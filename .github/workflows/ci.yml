@@ -6,8 +6,6 @@ on:
       - main
       - 'feature/**'
       - 'defect/**'
-    tags:
-      - 'v*'
   pull_request:
     branches:
       - main
