@@ -17,7 +17,7 @@ interface RadarrMovie {
     }
 }
 
-const TAG_NAME = 'letterboxd';
+const DEFAULT_TAG_NAME = 'letterboxd';
 
 const axios = Axios.create({
     baseURL: env.RADARR_API_URL,
@@ -144,6 +144,34 @@ export async function getOrCreateTag(tagName: string): Promise<number | null> {
     }
 }
 
+function parseConfiguredTags(): string[] {
+    const tags = [DEFAULT_TAG_NAME];
+    
+    if (env.RADARR_TAGS) {
+        const userTags = env.RADARR_TAGS
+            .split(',')
+            .map(tag => tag.trim())
+            .filter(tag => tag.length > 0);
+        tags.push(...userTags);
+    }
+    
+    return [...new Set(tags)];
+}
+
+export async function getAllRequiredTagIds(): Promise<number[]> {
+    const tagNames = parseConfiguredTags();
+    const tagIds: number[] = [];
+    
+    for (const tagName of tagNames) {
+        const tagId = await getOrCreateTag(tagName);
+        if (tagId) {
+            tagIds.push(tagId);
+        }
+    }
+    
+    return tagIds;
+}
+
 export async function upsertMovies(movies: LetterboxdMovie[]): Promise<void> {
     const qualityProfileId = await getQualityProfileId(env.RADARR_QUALITY_PROFILE);
 
@@ -157,18 +185,18 @@ export async function upsertMovies(movies: LetterboxdMovie[]): Promise<void> {
         throw new Error('Could not get root folder');
     }
 
-    const tagId = await getOrCreateTag(TAG_NAME);
+    const tagIds = await getAllRequiredTagIds();
 
-    if (!tagId) {
-        throw new Error('Could not get tag ID.');
+    if (tagIds.length === 0) {
+        throw new Error('Could not get any tag IDs.');
     }
 
     await Bluebird.map(movies, movie => {
-        return addMovie(movie, qualityProfileId, rootFolderPath, tagId, env.RADARR_MINIMUM_AVAILABILITY);
+        return addMovie(movie, qualityProfileId, rootFolderPath, tagIds, env.RADARR_MINIMUM_AVAILABILITY);
     });
 }
 
-export async function addMovie(movie: LetterboxdMovie, qualityProfileId: number, rootFolderPath: string, tagId: number, minimumAvailability: string): Promise<void> {
+export async function addMovie(movie: LetterboxdMovie, qualityProfileId: number, rootFolderPath: string, tagIds: number[], minimumAvailability: string): Promise<void> {
     try {
         logger.debug(`Adding movie to Radarr: ${movie.name}`);
 
@@ -184,7 +212,7 @@ export async function addMovie(movie: LetterboxdMovie, qualityProfileId: number,
             tmdbId: parseInt(movie.tmdbId),
             minimumAvailability,
             monitored: true,
-            tags: [tagId],
+            tags: tagIds,
             addOptions: {
                 searchForMovie: true
             }
