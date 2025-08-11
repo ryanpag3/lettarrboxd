@@ -44,10 +44,9 @@ jobs:
                         xargs -I {} date -d {} +%s 2>/dev/null || echo "0")
               
               if [[ "$TAG_DATE" -lt "$CUTOFF_DATE" ]] && [[ "$TAG_DATE" != "0" ]]; then
-                echo "Would delete old branch tag: $TAG (age: $((($CUTOFF_DATE - $TAG_DATE) / 86400)) days)"
-                # Uncomment to actually delete:
-                # curl -X DELETE -H "Authorization: Bearer ${{ secrets.DOCKERHUB_TOKEN }}" \
-                #   "https://hub.docker.com/v2/repositories/${{ env.IMAGE_NAME }}/tags/$TAG/"
+                echo "Deleting old branch tag: $TAG (age: $((($CUTOFF_DATE - $TAG_DATE) / 86400)) days)"
+                curl -X DELETE -H "Authorization: Bearer ${{ secrets.DOCKERHUB_TOKEN }}" \
+                  "https://hub.docker.com/v2/repositories/${{ env.IMAGE_NAME }}/tags/$TAG/"
               fi
             fi
             
@@ -60,12 +59,11 @@ jobs:
               
               PR_CUTOFF=$(date -d '7 days ago' +%s)
               if [[ "$TAG_DATE" -lt "$PR_CUTOFF" ]] && [[ "$TAG_DATE" != "0" ]]; then
-                echo "Would delete old PR tag: $TAG (age: $((($PR_CUTOFF - $TAG_DATE) / 86400)) days)"
-                # Uncomment to actually delete:
-                # curl -X DELETE -H "Authorization: Bearer ${{ secrets.DOCKERHUB_TOKEN }}" \
-                #   "https://hub.docker.com/v2/repositories/${{ env.IMAGE_NAME }}/tags/$TAG/"
+                echo "Deleting old PR tag: $TAG (age: $((($PR_CUTOFF - $TAG_DATE) / 86400)) days)"
+                curl -X DELETE -H "Authorization: Bearer ${{ secrets.DOCKERHUB_TOKEN }}" \
+                  "https://hub.docker.com/v2/repositories/${{ env.IMAGE_NAME }}/tags/$TAG/"
               fi
             fi
           done
           
-          echo "Cleanup dry-run completed. Uncomment delete commands to enable actual cleanup."
+          echo "Docker tag cleanup completed."
