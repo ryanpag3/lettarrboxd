@@ -166,6 +166,8 @@ export async function getAllRequiredTagIds(): Promise<number[]> {
         const tagId = await getOrCreateTag(tagName);
         if (tagId) {
             tagIds.push(tagId);
+        } else {
+            logger.warn(`Failed to create or retrieve tag: ${tagName}`);
         }
     }
     
@@ -186,10 +188,6 @@ export async function upsertMovies(movies: LetterboxdMovie[]): Promise<void> {
     }
 
     const tagIds = await getAllRequiredTagIds();
-
-    if (tagIds.length === 0) {
-        throw new Error('Could not get any tag IDs.');
-    }
 
     await Bluebird.map(movies, movie => {
         return addMovie(movie, qualityProfileId, rootFolderPath, tagIds, env.RADARR_MINIMUM_AVAILABILITY);
