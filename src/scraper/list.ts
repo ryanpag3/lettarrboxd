@@ -59,7 +59,7 @@ export class ListScraper implements Scraper {
         const $ = cheerio.load(html);
         const links: string[] = [];
         
-        $('.film-poster').each((_, element) => {
+        $('.react-component[data-target-link]').each((_, element) => {
             const filmLink = $(element).attr('data-target-link');
             if (filmLink) {
                 links.push(filmLink);
