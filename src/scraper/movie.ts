@@ -77,7 +77,7 @@ function extractImdbId($: cheerio.CheerioAPI): string|null {
 }
 
 function extractLetterboxdId($: cheerio.CheerioAPI): number {
-    const filmId = $('.film-poster').attr('data-film-id');
+    const filmId = $('.film-poster img').closest('[data-film-id]').attr('data-film-id');
     if (!filmId) {
         throw new Error('Could not find Letterboxd film ID');
     }
