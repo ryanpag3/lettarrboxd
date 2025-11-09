@@ -117,7 +117,7 @@ yarn start:dev
 ### Development Commands
 
 ```bash
-yarn start:dev     # Run with auto-reload
+yarn start:dev    # Run with auto-reload
 yarn tsc          # Compile TypeScript
 yarn tsc --noEmit # Type check only
 ```
