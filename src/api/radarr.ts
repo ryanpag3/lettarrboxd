@@ -26,42 +26,6 @@ const axios = Axios.create({
     }
 });
 
-export async function lookupMovieInRadarr(tmdbId: string): Promise<any> {
-    try {
-        logger.debug(`Looking up TMDB ID ${tmdbId} in Radarr...`);
-
-        const response = await axios.get(`/api/v3/movie/lookup/tmdb`, {
-            params: {
-                tmdbId: tmdbId
-            }
-        });
-
-        logger.debug(`Radarr response for TMDB ID ${tmdbId}:`, response.data);
-        return response.data;
-    } catch (error) {
-        logger.error(`Error looking up TMDB ID ${tmdbId} in Radarr:`, error);
-        return null;
-    }
-}
-
-export async function checkMovieInRadarr(tmdbId: string): Promise<any> {
-    try {
-        logger.debug(`Checking if TMDB ID ${tmdbId} exists in Radarr...`);
-
-        const response = await axios.get('/api/v3/movie', {
-            params: {
-                tmdbId: tmdbId
-            }
-        });
-
-        logger.debug(`Radarr library check for TMDB ID ${tmdbId}:`, response.data);
-        return response.data;
-    } catch (error) {
-        logger.error(`Error checking TMDB ID ${tmdbId} in Radarr library:`, error);
-        return null;
-    }
-}
-
 export async function getQualityProfileId(profileName: string): Promise<number | null> {
     try {
         logger.debug(`Getting quality profile ID for: ${profileName}`);
@@ -146,7 +110,7 @@ export async function getOrCreateTag(tagName: string): Promise<number | null> {
 
 function parseConfiguredTags(): string[] {
     const tags = [DEFAULT_TAG_NAME];
-    
+
     if (env.RADARR_TAGS) {
         const userTags = env.RADARR_TAGS
             .split(',')
@@ -154,7 +118,7 @@ function parseConfiguredTags(): string[] {
             .filter(tag => tag.length > 0);
         tags.push(...userTags);
     }
-    
+
     return [...new Set(tags)];
 }
 
@@ -163,14 +127,14 @@ export async function getAllRequiredTagIds(): Promise<number[]> {
     const tagIdPromises = tagNames.map(tagName => getOrCreateTag(tagName));
     const tagIdsRaw = await Promise.all(tagIdPromises);
     const tagIds = tagIdsRaw.filter((tagId): tagId is number => tagId !== null);
-    
+
     // Log warnings for any failed tag creations
     tagNames.forEach((tagName, index) => {
         if (tagIdsRaw[index] === null) {
             logger.warn(`Failed to create or retrieve tag: ${tagName}`);
         }
     });
-    
+
     return tagIds;
 }
 
@@ -182,7 +146,7 @@ export async function upsertMovies(movies: LetterboxdMovie[]): Promise<void> {
     }
 
     const rootFolderPath = !env.RADARR_ROOT_FOLDER_ID ? await getRootFolder() : await getRootFolderById(env.RADARR_ROOT_FOLDER_ID);
-    
+
     if (!rootFolderPath) {
         throw new Error('Could not get root folder');
     }
