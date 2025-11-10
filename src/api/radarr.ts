@@ -173,7 +173,7 @@ export async function addMovie(movie: LetterboxdMovie, qualityProfileId: number,
             rootFolderPath,
             tmdbId: parseInt(movie.tmdbId),
             minimumAvailability,
-            monitored: true,
+            monitored: !env.RADARR_ADD_UNMONITORED,
             tags: tagIds,
             addOptions: {
                 searchForMovie: true
