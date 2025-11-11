@@ -98,9 +98,9 @@ jobs:
           tags: |
             type=ref,event=branch,suffix=-{{sha}}
             type=ref,event=pr,suffix=-{{sha}}
-            type=semver,pattern=v{{version}}
-            type=semver,pattern=v{{major}}.{{minor}}
-            type=semver,pattern=v{{major}}
+            type=semver,pattern=v{{version}},enable=${{ github.event_name == 'release' }}
+            type=semver,pattern=v{{major}}.{{minor}},enable=${{ github.event_name == 'release' }}
+            type=semver,pattern=v{{major}},enable=${{ github.event_name == 'release' }}
             type=raw,value=staging,enable=${{ github.ref == 'refs/heads/main' }}
             type=raw,value=latest,enable=${{ github.event_name == 'release' }}
 
