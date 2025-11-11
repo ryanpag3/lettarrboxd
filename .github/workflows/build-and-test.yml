@@ -68,6 +68,11 @@ jobs:
           echo ""
           echo "Required Threshold: 85% for all metrics"
 
+      - name: Run integration tests
+        run: yarn test:integration
+        env:
+          CI: true
+
       - name: Comment coverage on PR
         if: github.event_name == 'pull_request'
         uses: romeovs/lcov-reporter-action@v0.3.1
