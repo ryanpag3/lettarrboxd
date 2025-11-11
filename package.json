@@ -11,9 +11,10 @@
     "start:dev": "nodemon src/index.ts",
     "build": "tsc",
     "test": "jest",
+    "test:unit": "jest --testPathIgnorePatterns=itest",
+    "test:integration": "jest --testPathPatterns=itest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
-    "test:integration": "jest --testPathPatterns=integration"
+    "test:coverage": "jest --coverage"
   },
   "dependencies": {
     "axios": "^1.10.0",
