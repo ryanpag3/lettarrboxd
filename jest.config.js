@@ -3,10 +3,20 @@ module.exports = {
   testEnvironment: 'node',
   roots: ['<rootDir>/src'],
   testMatch: ['**/*.test.ts'],
-  setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup.ts'],
   collectCoverageFrom: [
     'src/**/*.ts',
     '!src/**/*.d.ts',
     '!src/**/*.test.ts',
-  ]
+  ],
+  coverageReporters: ['text', 'lcov', 'json-summary'],
+  coverageDirectory: 'coverage',
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  coverageThreshold: {
+    global: {
+      branches: 85,
+      functions: 85,
+      lines: 85,
+      statements: 85,
+    },
+  },
 };
