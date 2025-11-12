@@ -157,22 +157,64 @@ describe('scraper index', () => {
       );
     });
 
-    it('should throw error for actor filmography (not implemented)', async () => {
-      await expect(
-        fetchMoviesFromUrl('https://letterboxd.com/actor/tom-hanks')
-      ).rejects.toThrow('Actor filmography scraping not implemented');
+    it('should fetch movies from actor filmography URL', async () => {
+      const mockMovies = [
+        { id: 1, name: 'Movie 1', slug: '/film/movie1/', tmdbId: '123', imdbId: null, publishedYear: null },
+      ];
+
+      const mockGetMovies = jest.fn().mockResolvedValue(mockMovies);
+      (ListScraper as jest.Mock).mockImplementation(() => ({
+        getMovies: mockGetMovies,
+      }));
+
+      const result = await fetchMoviesFromUrl('https://letterboxd.com/actor/tom-hanks');
+
+      expect(result).toEqual(mockMovies);
+      expect(ListScraper).toHaveBeenCalledWith(
+        'https://letterboxd.com/actor/tom-hanks',
+        undefined,
+        undefined
+      );
     });
 
-    it('should throw error for director filmography (not implemented)', async () => {
-      await expect(
-        fetchMoviesFromUrl('https://letterboxd.com/director/steven-spielberg')
-      ).rejects.toThrow('Director filmography scraping not implemented');
+    it('should fetch movies from director filmography URL', async () => {
+      const mockMovies = [
+        { id: 1, name: 'Movie 1', slug: '/film/movie1/', tmdbId: '123', imdbId: null, publishedYear: null },
+      ];
+
+      const mockGetMovies = jest.fn().mockResolvedValue(mockMovies);
+      (ListScraper as jest.Mock).mockImplementation(() => ({
+        getMovies: mockGetMovies,
+      }));
+
+      const result = await fetchMoviesFromUrl('https://letterboxd.com/director/steven-spielberg');
+
+      expect(result).toEqual(mockMovies);
+      expect(ListScraper).toHaveBeenCalledWith(
+        'https://letterboxd.com/director/steven-spielberg',
+        undefined,
+        undefined
+      );
     });
 
-    it('should throw error for writer filmography (not implemented)', async () => {
-      await expect(
-        fetchMoviesFromUrl('https://letterboxd.com/writer/aaron-sorkin')
-      ).rejects.toThrow('Writer filmography scraping not implemented');
+    it('should fetch movies from writer filmography URL', async () => {
+      const mockMovies = [
+        { id: 1, name: 'Movie 1', slug: '/film/movie1/', tmdbId: '123', imdbId: null, publishedYear: null },
+      ];
+
+      const mockGetMovies = jest.fn().mockResolvedValue(mockMovies);
+      (ListScraper as jest.Mock).mockImplementation(() => ({
+        getMovies: mockGetMovies,
+      }));
+
+      const result = await fetchMoviesFromUrl('https://letterboxd.com/writer/aaron-sorkin');
+
+      expect(result).toEqual(mockMovies);
+      expect(ListScraper).toHaveBeenCalledWith(
+        'https://letterboxd.com/writer/aaron-sorkin',
+        undefined,
+        undefined
+      );
     });
 
     it('should throw error for collections (not implemented)', async () => {
