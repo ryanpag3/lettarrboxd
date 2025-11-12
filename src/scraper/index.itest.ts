@@ -42,11 +42,20 @@ describe('scraper index integration tests', () => {
       ).rejects.toThrow('Unsupported URL format');
     });
 
-    it('should throw error for unimplemented list types', async () => {
-      // Watched movies is not implemented
-      await expect(
-        fetchMoviesFromUrl('https://letterboxd.com/someuser/films')
-      ).rejects.toThrow('Watched movies scraping not implemented');
+    it('should fetch movies from watched movies URL', async () => {
+      // Using a public watched movies page
+      const movies = await fetchMoviesFromUrl('https://letterboxd.com/pahjay/films');
+
+      expect(movies).toBeDefined();
+      expect(Array.isArray(movies)).toBe(true);
+      expect(movies.length).toBeGreaterThan(0);
+
+      // Verify structure of returned movies
+      const firstMovie = movies[0];
+      expect(firstMovie).toHaveProperty('id');
+      expect(firstMovie).toHaveProperty('name');
+      expect(firstMovie).toHaveProperty('slug');
+      expect(firstMovie).toHaveProperty('tmdbId');
     });
 
     it('should fetch movies from actor filmography', async () => {

@@ -76,5 +76,35 @@ describe('list scraper integration tests', () => {
       expect(Array.isArray(movies)).toBe(true);
       expect(movies.length).toBe(0);
     });
+
+    it('should fetch movies from watched movies page', async () => {
+      // Test with a public watched movies page
+      // Using a user's watched films page
+      const scraper = new ListScraper(
+        'https://letterboxd.com/pahjay/films/',
+        3 // Only fetch first 3 to keep test fast
+      );
+
+      const movies = await scraper.getMovies();
+
+      expect(movies).toBeDefined();
+      expect(Array.isArray(movies)).toBe(true);
+      expect(movies.length).toBeGreaterThan(0);
+      expect(movies.length).toBeLessThanOrEqual(3);
+
+      // Verify structure of returned movies
+      movies.forEach(movie => {
+        expect(movie).toHaveProperty('id');
+        expect(movie).toHaveProperty('name');
+        expect(movie).toHaveProperty('slug');
+        expect(movie).toHaveProperty('tmdbId');
+        expect(movie).toHaveProperty('imdbId');
+        expect(movie).toHaveProperty('publishedYear');
+
+        expect(typeof movie.id).toBe('number');
+        expect(typeof movie.name).toBe('string');
+        expect(typeof movie.slug).toBe('string');
+      });
+    });
   });
 });

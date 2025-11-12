@@ -151,9 +151,23 @@ describe('scraper index', () => {
       );
     });
 
-    it('should throw error for watched movies (not implemented)', async () => {
-      await expect(fetchMoviesFromUrl('https://letterboxd.com/user/films')).rejects.toThrow(
-        'Watched movies scraping not implemented'
+    it('should fetch movies from watched movies URL', async () => {
+      const mockMovies = [
+        { id: 1, name: 'Movie 1', slug: '/film/movie1/', tmdbId: '123', imdbId: null, publishedYear: null },
+      ];
+
+      const mockGetMovies = jest.fn().mockResolvedValue(mockMovies);
+      (ListScraper as jest.Mock).mockImplementation(() => ({
+        getMovies: mockGetMovies,
+      }));
+
+      const result = await fetchMoviesFromUrl('https://letterboxd.com/user/films');
+
+      expect(result).toEqual(mockMovies);
+      expect(ListScraper).toHaveBeenCalledWith(
+        'https://letterboxd.com/user/films',
+        undefined,
+        undefined
       );
     });
 

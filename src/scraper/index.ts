@@ -56,7 +56,8 @@ export const fetchMoviesFromUrl = async (url: string): Promise<LetterboxdMovie[]
     case ListType.WRITER_FILMOGRAPHY:
     case ListType.WATCHLIST:
     case ListType.REGULAR_LIST:
-      // Filmography pages and lists use the same HTML structure
+    case ListType.WATCHED_MOVIES:
+      // Filmography pages, lists, and watched movies use the same HTML structure
       // Determine take parameters from environment variables
       let take: number | undefined = undefined;
       let strategy: 'oldest' | 'newest' | undefined = undefined;
@@ -68,10 +69,6 @@ export const fetchMoviesFromUrl = async (url: string): Promise<LetterboxdMovie[]
 
       const listScraper = new ListScraper(url, take, strategy);
       return listScraper.getMovies();
-
-    case ListType.WATCHED_MOVIES:
-      // TODO: Implement watched movies scraping
-      throw new Error('Watched movies scraping not implemented');
       
     case ListType.COLLECTIONS:
       // TODO: Implement collections scraping
