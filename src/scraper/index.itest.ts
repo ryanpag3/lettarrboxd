@@ -49,16 +49,48 @@ describe('scraper index integration tests', () => {
       ).rejects.toThrow('Watched movies scraping not implemented');
     });
 
-    it('should throw error for actor filmography (not implemented)', async () => {
-      await expect(
-        fetchMoviesFromUrl('https://letterboxd.com/actor/tom-hanks')
-      ).rejects.toThrow('Actor filmography scraping not implemented');
+    it('should fetch movies from actor filmography', async () => {
+      // Using Tom Hanks' filmography
+      const movies = await fetchMoviesFromUrl('https://letterboxd.com/actor/tom-hanks');
+
+      expect(movies).toBeDefined();
+      expect(Array.isArray(movies)).toBe(true);
+      expect(movies.length).toBeGreaterThan(0);
+
+      // Verify structure of returned movies
+      const firstMovie = movies[0];
+      expect(firstMovie).toHaveProperty('id');
+      expect(firstMovie).toHaveProperty('name');
+      expect(firstMovie).toHaveProperty('slug');
+      expect(firstMovie).toHaveProperty('tmdbId');
     });
 
-    it('should throw error for director filmography (not implemented)', async () => {
-      await expect(
-        fetchMoviesFromUrl('https://letterboxd.com/director/christopher-nolan')
-      ).rejects.toThrow('Director filmography scraping not implemented');
+    it('should fetch movies from director filmography', async () => {
+      // Using Christopher Nolan's filmography
+      const movies = await fetchMoviesFromUrl('https://letterboxd.com/director/christopher-nolan');
+
+      expect(movies).toBeDefined();
+      expect(Array.isArray(movies)).toBe(true);
+      expect(movies.length).toBeGreaterThan(0);
+
+      const firstMovie = movies[0];
+      expect(firstMovie).toHaveProperty('id');
+      expect(firstMovie).toHaveProperty('name');
+      expect(firstMovie).toHaveProperty('slug');
+    });
+
+    it('should fetch movies from writer filmography', async () => {
+      // Using Charlie Kaufman's filmography
+      const movies = await fetchMoviesFromUrl('https://letterboxd.com/writer/charlie-kaufman');
+
+      expect(movies).toBeDefined();
+      expect(Array.isArray(movies)).toBe(true);
+      expect(movies.length).toBeGreaterThan(0);
+
+      const firstMovie = movies[0];
+      expect(firstMovie).toHaveProperty('id');
+      expect(firstMovie).toHaveProperty('name');
+      expect(firstMovie).toHaveProperty('slug');
     });
 
     it('should throw error for collections (not implemented)', async () => {

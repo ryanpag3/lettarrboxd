@@ -13,12 +13,12 @@ The application supports various types of Letterboxd URLs for the `LETTERBOXD_UR
 ### Currently Supported
 - **Watchlists**: `https://letterboxd.com/username/watchlist/`
 - **Regular Lists**: `https://letterboxd.com/username/list/list-name/`
-
-### Planned Support (Coming Soon)
-- **Watched Movies**: `https://letterboxd.com/username/films/`
 - **Actor Filmography**: `https://letterboxd.com/actor/actor-name/`
 - **Director Filmography**: `https://letterboxd.com/director/director-name/`
 - **Writer Filmography**: `https://letterboxd.com/writer/writer-name/`
+
+### Planned Support (Coming Soon)
+- **Watched Movies**: `https://letterboxd.com/username/films/`
 - **Collections**: `https://letterboxd.com/films/in/collection-name/`
 - **Popular Movies**: `https://letterboxd.com/films/popular/`
 
@@ -32,6 +32,15 @@ LETTERBOXD_URL=https://letterboxd.com/dave/list/official-top-250-narrative-featu
 
 # Another user's list
 LETTERBOXD_URL=https://letterboxd.com/criterion/list/the-criterion-collection/
+
+# Actor filmography (e.g., Tom Hanks)
+LETTERBOXD_URL=https://letterboxd.com/actor/tom-hanks/
+
+# Director filmography (e.g., Christopher Nolan)
+LETTERBOXD_URL=https://letterboxd.com/director/christopher-nolan/
+
+# Writer filmography (e.g., Aaron Sorkin)
+LETTERBOXD_URL=https://letterboxd.com/writer/aaron-sorkin/
 ```
 
 **Note**: All Letterboxd lists must be public for the application to access them.

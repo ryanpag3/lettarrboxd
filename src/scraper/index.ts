@@ -51,35 +51,27 @@ export const fetchMoviesFromUrl = async (url: string): Promise<LetterboxdMovie[]
   }
   
   switch (listType) {
+    case ListType.ACTOR_FILMOGRAPHY:
+    case ListType.DIRECTOR_FILMOGRAPHY:
+    case ListType.WRITER_FILMOGRAPHY:
     case ListType.WATCHLIST:
     case ListType.REGULAR_LIST:
+      // Filmography pages and lists use the same HTML structure
       // Determine take parameters from environment variables
       let take: number | undefined = undefined;
       let strategy: 'oldest' | 'newest' | undefined = undefined;
-      
+
       if (env.LETTERBOXD_TAKE_AMOUNT && env.LETTERBOXD_TAKE_STRATEGY) {
         take = env.LETTERBOXD_TAKE_AMOUNT;
         strategy = env.LETTERBOXD_TAKE_STRATEGY;
       }
-      
+
       const listScraper = new ListScraper(url, take, strategy);
       return listScraper.getMovies();
-      
+
     case ListType.WATCHED_MOVIES:
       // TODO: Implement watched movies scraping
       throw new Error('Watched movies scraping not implemented');
-      
-    case ListType.ACTOR_FILMOGRAPHY:
-      // TODO: Implement actor filmography scraping
-      throw new Error('Actor filmography scraping not implemented');
-      
-    case ListType.DIRECTOR_FILMOGRAPHY:
-      // TODO: Implement director filmography scraping
-      throw new Error('Director filmography scraping not implemented');
-      
-    case ListType.WRITER_FILMOGRAPHY:
-      // TODO: Implement writer filmography scraping
-      throw new Error('Writer filmography scraping not implemented');
       
     case ListType.COLLECTIONS:
       // TODO: Implement collections scraping
