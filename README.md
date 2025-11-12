@@ -14,12 +14,12 @@ The application supports various types of Letterboxd URLs for the `LETTERBOXD_UR
 - **Watchlists**: `https://letterboxd.com/username/watchlist/`
 - **Regular Lists**: `https://letterboxd.com/username/list/list-name/`
 - **Watched Movies**: `https://letterboxd.com/username/films/`
+- **Collections**: `https://letterboxd.com/films/in/collection-name/`
 - **Actor Filmography**: `https://letterboxd.com/actor/actor-name/`
 - **Director Filmography**: `https://letterboxd.com/director/director-name/`
 - **Writer Filmography**: `https://letterboxd.com/writer/writer-name/`
 
 ### Planned Support (Coming Soon)
-- **Collections**: `https://letterboxd.com/films/in/collection-name/`
 - **Popular Movies**: `https://letterboxd.com/films/popular/`
 
 ### Examples
@@ -32,6 +32,9 @@ LETTERBOXD_URL=https://letterboxd.com/dave/list/official-top-250-narrative-featu
 
 # User's watched movies
 LETTERBOXD_URL=https://letterboxd.com/moviefan123/films/
+
+# Movie collection
+LETTERBOXD_URL=https://letterboxd.com/films/in/the-dark-knight-collection/
 
 # Another user's list
 LETTERBOXD_URL=https://letterboxd.com/criterion/list/the-criterion-collection/

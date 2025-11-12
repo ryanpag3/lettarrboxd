@@ -1,4 +1,5 @@
 import { ListScraper } from './list';
+import { CollectionsScraper } from './collections';
 import env from '../util/env';
 
 export interface LetterboxdMovie {
@@ -69,10 +70,19 @@ export const fetchMoviesFromUrl = async (url: string): Promise<LetterboxdMovie[]
 
       const listScraper = new ListScraper(url, take, strategy);
       return listScraper.getMovies();
-      
+
     case ListType.COLLECTIONS:
-      // TODO: Implement collections scraping
-      throw new Error('Collections scraping not implemented');
+      // Collections load movies via AJAX endpoint
+      let collectionTake: number | undefined = undefined;
+      let collectionStrategy: 'oldest' | 'newest' | undefined = undefined;
+
+      if (env.LETTERBOXD_TAKE_AMOUNT && env.LETTERBOXD_TAKE_STRATEGY) {
+        collectionTake = env.LETTERBOXD_TAKE_AMOUNT;
+        collectionStrategy = env.LETTERBOXD_TAKE_STRATEGY;
+      }
+
+      const collectionsScraper = new CollectionsScraper(url, collectionTake, collectionStrategy);
+      return collectionsScraper.getMovies();
       
     case ListType.POPULAR_MOVIES:
       // TODO: Implement popular movies scraping

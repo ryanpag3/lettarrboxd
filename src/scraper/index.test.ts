@@ -1,5 +1,6 @@
 import { detectListType, fetchMoviesFromUrl, ListType } from './index';
 import { ListScraper } from './list';
+import { CollectionsScraper } from './collections';
 
 // Mock the logger
 jest.mock('../util/logger', () => ({
@@ -18,6 +19,9 @@ jest.mock('../util/env', () => ({
 
 // Mock the ListScraper
 jest.mock('./list');
+
+// Mock the CollectionsScraper
+jest.mock('./collections');
 
 describe('scraper index', () => {
   beforeEach(() => {
@@ -231,10 +235,24 @@ describe('scraper index', () => {
       );
     });
 
-    it('should throw error for collections (not implemented)', async () => {
-      await expect(
-        fetchMoviesFromUrl('https://letterboxd.com/films/in/marvel-cinematic-universe')
-      ).rejects.toThrow('Collections scraping not implemented');
+    it('should fetch movies from collections URL', async () => {
+      const mockMovies = [
+        { id: 1, name: 'Movie 1', slug: '/film/movie1/', tmdbId: '123', imdbId: null, publishedYear: null },
+      ];
+
+      const mockGetMovies = jest.fn().mockResolvedValue(mockMovies);
+      (CollectionsScraper as jest.Mock).mockImplementation(() => ({
+        getMovies: mockGetMovies,
+      }));
+
+      const result = await fetchMoviesFromUrl('https://letterboxd.com/films/in/marvel-cinematic-universe');
+
+      expect(result).toEqual(mockMovies);
+      expect(CollectionsScraper).toHaveBeenCalledWith(
+        'https://letterboxd.com/films/in/marvel-cinematic-universe',
+        undefined,
+        undefined
+      );
     });
 
     it('should throw error for popular movies (not implemented)', async () => {

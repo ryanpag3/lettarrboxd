@@ -102,10 +102,20 @@ describe('scraper index integration tests', () => {
       expect(firstMovie).toHaveProperty('slug');
     });
 
-    it('should throw error for collections (not implemented)', async () => {
-      await expect(
-        fetchMoviesFromUrl('https://letterboxd.com/films/in/marvel-cinematic-universe')
-      ).rejects.toThrow('Collections scraping not implemented');
+    it('should fetch movies from collections URL', async () => {
+      // Using The Dark Knight Collection
+      const movies = await fetchMoviesFromUrl('https://letterboxd.com/films/in/the-dark-knight-collection');
+
+      expect(movies).toBeDefined();
+      expect(Array.isArray(movies)).toBe(true);
+      expect(movies.length).toBeGreaterThan(0);
+
+      // Verify structure of returned movies
+      const firstMovie = movies[0];
+      expect(firstMovie).toHaveProperty('id');
+      expect(firstMovie).toHaveProperty('name');
+      expect(firstMovie).toHaveProperty('slug');
+      expect(firstMovie).toHaveProperty('tmdbId');
     });
   });
 });
