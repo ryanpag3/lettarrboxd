@@ -74,6 +74,131 @@ docker run -d \
 ```
 See [docker-compose.yaml](./docker-compose.yaml) for complete example.
 
+## Watching Multiple Lists
+
+To monitor multiple Letterboxd lists simultaneously, deploy one lettarrboxd instance per list. Each instance operates independently with its own configuration, allowing you to:
+
+- Watch different lists with different quality profiles
+- Use custom tags to organize movies from different sources
+- Set different check intervals for each list
+- Maintain separate data directories to track each list's state
+
+### Docker Compose Multi-List Example
+
+```yaml
+services:
+  lettarrboxd-watchlist:
+    image: ryanpage/lettarrboxd:latest
+    container_name: lettarrboxd-watchlist
+    environment:
+      - LETTERBOXD_URL=https://letterboxd.com/your_username/watchlist/
+      - RADARR_API_URL=http://radarr:7878
+      - RADARR_API_KEY=your_api_key
+      - RADARR_QUALITY_PROFILE=HD-1080p
+      - RADARR_TAGS=watchlist,personal
+      - CHECK_INTERVAL_MINUTES=60
+    volumes:
+      - ./data/watchlist:/data
+    restart: unless-stopped
+
+  lettarrboxd-criterion:
+    image: ryanpage/lettarrboxd:latest
+    container_name: lettarrboxd-criterion
+    environment:
+      - LETTERBOXD_URL=https://letterboxd.com/criterion/list/the-criterion-collection/
+      - RADARR_API_URL=http://radarr:7878
+      - RADARR_API_KEY=your_api_key
+      - RADARR_QUALITY_PROFILE=HD-1080p
+      - RADARR_TAGS=criterion,classics
+      - CHECK_INTERVAL_MINUTES=120
+    volumes:
+      - ./data/criterion:/data
+    restart: unless-stopped
+
+  lettarrboxd-nolan:
+    image: ryanpage/lettarrboxd:latest
+    container_name: lettarrboxd-nolan
+    environment:
+      - LETTERBOXD_URL=https://letterboxd.com/director/christopher-nolan/
+      - RADARR_API_URL=http://radarr:7878
+      - RADARR_API_KEY=your_api_key
+      - RADARR_QUALITY_PROFILE=Ultra HD
+      - RADARR_TAGS=nolan,director-filmography
+      - CHECK_INTERVAL_MINUTES=1440  # Check once per day
+    volumes:
+      - ./data/nolan:/data
+    restart: unless-stopped
+```
+
+### Docker CLI Multi-List Example
+
+```bash
+# Watch your personal watchlist
+docker run -d \
+  --name lettarrboxd-watchlist \
+  -e LETTERBOXD_URL=https://letterboxd.com/your_username/watchlist/ \
+  -e RADARR_API_URL=http://radarr:7878 \
+  -e RADARR_API_KEY=your_api_key \
+  -e RADARR_QUALITY_PROFILE="HD-1080p" \
+  -e RADARR_TAGS="watchlist,personal" \
+  -e CHECK_INTERVAL_MINUTES=60 \
+  -v ./data/watchlist:/data \
+  ryanpage/lettarrboxd:latest
+
+# Watch the Criterion Collection
+docker run -d \
+  --name lettarrboxd-criterion \
+  -e LETTERBOXD_URL=https://letterboxd.com/criterion/list/the-criterion-collection/ \
+  -e RADARR_API_URL=http://radarr:7878 \
+  -e RADARR_API_KEY=your_api_key \
+  -e RADARR_QUALITY_PROFILE="HD-1080p" \
+  -e RADARR_TAGS="criterion,classics" \
+  -e CHECK_INTERVAL_MINUTES=120 \
+  -v ./data/criterion:/data \
+  ryanpage/lettarrboxd:latest
+
+# Watch Christopher Nolan's filmography
+docker run -d \
+  --name lettarrboxd-nolan \
+  -e LETTERBOXD_URL=https://letterboxd.com/director/christopher-nolan/ \
+  -e RADARR_API_URL=http://radarr:7878 \
+  -e RADARR_API_KEY=your_api_key \
+  -e RADARR_QUALITY_PROFILE="Ultra HD" \
+  -e RADARR_TAGS="nolan,director-filmography" \
+  -e CHECK_INTERVAL_MINUTES=1440 \
+  -v ./data/nolan:/data \
+  ryanpage/lettarrboxd:latest
+```
+
+### Best Practices for Multi-List Setup
+
+1. **Unique Container Names**: Each instance must have a unique container name (e.g., `lettarrboxd-watchlist`, `lettarrboxd-criterion`)
+
+2. **Separate Data Directories**: Use different volume mounts for each instance to maintain independent state tracking:
+   ```yaml
+   volumes:
+     - ./data/watchlist:/data    # Instance 1
+     - ./data/criterion:/data    # Instance 2
+   ```
+
+3. **Distinctive Tags**: Use the `RADARR_TAGS` variable to organize movies by source:
+   ```yaml
+   - RADARR_TAGS=watchlist,personal
+   - RADARR_TAGS=criterion,classics
+   - RADARR_TAGS=nolan,director-filmography
+   ```
+
+4. **Appropriate Check Intervals**: Adjust `CHECK_INTERVAL_MINUTES` based on how frequently each list updates:
+   - Personal watchlists: 30-60 minutes
+   - Curated lists: 2-24 hours
+   - Static collections: 24 hours or more
+
+5. **Quality Profiles**: Each instance can use different quality profiles based on content type:
+   ```yaml
+   - RADARR_QUALITY_PROFILE=HD-1080p      # Standard content
+   - RADARR_QUALITY_PROFILE=Ultra HD       # Premium content
+   ```
+
 ## Configuration
 
 ### Required Environment Variables

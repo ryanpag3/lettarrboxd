@@ -1,4 +1,5 @@
 services:
+  # Single instance example - watches one list
   lettarrboxd:
     image: ryanpage/lettarrboxd:latest
     container_name: lettarrboxd
@@ -8,17 +9,62 @@ services:
       - RADARR_API_URL=http://radarr:7878
       - RADARR_API_KEY=your_api_key
       - RADARR_QUALITY_PROFILE=HD-1080p
-      
+
       # Optional variables with defaults
       - NODE_ENV=production
       - LOG_LEVEL=info
       - CHECK_INTERVAL_MINUTES=60
       - RADARR_MINIMUM_AVAILABILITY=released
-      
+
       # Optional root folder ID (if not specified, uses first available)
       # - RADARR_ROOT_FOLDER_ID=1
-      
+
       # Optional movie limiting (both required if using)
       # - LETTERBOXD_TAKE_AMOUNT=10
       # - LETTERBOXD_TAKE_STRATEGY=newest
     restart: unless-stopped
+
+  # Multi-list example - deploy one instance per list
+  # Uncomment the services below to watch multiple lists simultaneously
+
+  # lettarrboxd-watchlist:
+  #   image: ryanpage/lettarrboxd:latest
+  #   container_name: lettarrboxd-watchlist
+  #   environment:
+  #     - LETTERBOXD_URL=https://letterboxd.com/your_username/watchlist/
+  #     - RADARR_API_URL=http://radarr:7878
+  #     - RADARR_API_KEY=your_api_key
+  #     - RADARR_QUALITY_PROFILE=HD-1080p
+  #     - RADARR_TAGS=watchlist,personal
+  #     - CHECK_INTERVAL_MINUTES=60
+  #   volumes:
+  #     - ./data/watchlist:/data
+  #   restart: unless-stopped
+
+  # lettarrboxd-criterion:
+  #   image: ryanpage/lettarrboxd:latest
+  #   container_name: lettarrboxd-criterion
+  #   environment:
+  #     - LETTERBOXD_URL=https://letterboxd.com/criterion/list/the-criterion-collection/
+  #     - RADARR_API_URL=http://radarr:7878
+  #     - RADARR_API_KEY=your_api_key
+  #     - RADARR_QUALITY_PROFILE=HD-1080p
+  #     - RADARR_TAGS=criterion,classics
+  #     - CHECK_INTERVAL_MINUTES=120
+  #   volumes:
+  #     - ./data/criterion:/data
+  #   restart: unless-stopped
+
+  # lettarrboxd-nolan:
+  #   image: ryanpage/lettarrboxd:latest
+  #   container_name: lettarrboxd-nolan
+  #   environment:
+  #     - LETTERBOXD_URL=https://letterboxd.com/director/christopher-nolan/
+  #     - RADARR_API_URL=http://radarr:7878
+  #     - RADARR_API_KEY=your_api_key
+  #     - RADARR_QUALITY_PROFILE=Ultra HD
+  #     - RADARR_TAGS=nolan,director-filmography
+  #     - CHECK_INTERVAL_MINUTES=1440  # Check once per day
+  #   volumes:
+  #     - ./data/nolan:/data
+  #   restart: unless-stopped
