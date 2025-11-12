@@ -77,6 +77,40 @@ describe('PopularScraper', () => {
         'https://letterboxd.com/films/ajax/popular/'
       );
     });
+
+    it('should handle already-transformed AJAX URLs', async () => {
+      const mockHtml = `
+        <div class="react-component" data-target-link="/film/movie1/"></div>
+      `;
+
+      (global.fetch as jest.Mock).mockResolvedValue({
+        ok: true,
+        text: async () => mockHtml,
+      });
+
+      (getMovie as jest.Mock).mockResolvedValue({
+        id: 1,
+        name: 'Test Movie',
+        slug: '/film/movie1/',
+        tmdbId: '123',
+        imdbId: null,
+        publishedYear: null,
+      });
+
+      const scraper = new PopularScraper('https://letterboxd.com/films/ajax/popular/', 1);
+      await scraper.getMovies();
+
+      // Should use the URL as-is
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://letterboxd.com/films/ajax/popular/'
+      );
+    });
+
+    it('should throw error for unsupported URL format', async () => {
+      const scraper = new PopularScraper('https://example.com/invalid-url/', 1);
+
+      await expect(scraper.getMovies()).rejects.toThrow('Unsupported popular movies URL format');
+    });
   });
 
   describe('getMovies', () => {
