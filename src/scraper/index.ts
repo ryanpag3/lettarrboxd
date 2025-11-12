@@ -1,5 +1,6 @@
 import { ListScraper } from './list';
 import { CollectionsScraper } from './collections';
+import { PopularScraper } from './popular';
 import env from '../util/env';
 
 export interface LetterboxdMovie {
@@ -83,10 +84,19 @@ export const fetchMoviesFromUrl = async (url: string): Promise<LetterboxdMovie[]
 
       const collectionsScraper = new CollectionsScraper(url, collectionTake, collectionStrategy);
       return collectionsScraper.getMovies();
-      
+
     case ListType.POPULAR_MOVIES:
-      // TODO: Implement popular movies scraping
-      throw new Error('Popular movies scraping not implemented');
+      // Popular movies load via AJAX endpoint
+      let popularTake: number | undefined = undefined;
+      let popularStrategy: 'oldest' | 'newest' | undefined = undefined;
+
+      if (env.LETTERBOXD_TAKE_AMOUNT && env.LETTERBOXD_TAKE_STRATEGY) {
+        popularTake = env.LETTERBOXD_TAKE_AMOUNT;
+        popularStrategy = env.LETTERBOXD_TAKE_STRATEGY;
+      }
+
+      const popularScraper = new PopularScraper(url, popularTake, popularStrategy);
+      return popularScraper.getMovies();
       
     default:
       throw new Error(`Unsupported list type: ${listType}`);

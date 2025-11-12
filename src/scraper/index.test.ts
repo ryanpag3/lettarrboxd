@@ -1,6 +1,7 @@
 import { detectListType, fetchMoviesFromUrl, ListType } from './index';
 import { ListScraper } from './list';
 import { CollectionsScraper } from './collections';
+import { PopularScraper } from './popular';
 
 // Mock the logger
 jest.mock('../util/logger', () => ({
@@ -22,6 +23,9 @@ jest.mock('./list');
 
 // Mock the CollectionsScraper
 jest.mock('./collections');
+
+// Mock the PopularScraper
+jest.mock('./popular');
 
 describe('scraper index', () => {
   beforeEach(() => {
@@ -255,10 +259,24 @@ describe('scraper index', () => {
       );
     });
 
-    it('should throw error for popular movies (not implemented)', async () => {
-      await expect(
-        fetchMoviesFromUrl('https://letterboxd.com/films/popular')
-      ).rejects.toThrow('Popular movies scraping not implemented');
+    it('should fetch movies from popular movies URL', async () => {
+      const mockMovies = [
+        { id: 1, name: 'Movie 1', slug: '/film/movie1/', tmdbId: '123', imdbId: null, publishedYear: null },
+      ];
+
+      const mockGetMovies = jest.fn().mockResolvedValue(mockMovies);
+      (PopularScraper as jest.Mock).mockImplementation(() => ({
+        getMovies: mockGetMovies,
+      }));
+
+      const result = await fetchMoviesFromUrl('https://letterboxd.com/films/popular');
+
+      expect(result).toEqual(mockMovies);
+      expect(PopularScraper).toHaveBeenCalledWith(
+        'https://letterboxd.com/films/popular',
+        undefined,
+        undefined
+      );
     });
   });
 });

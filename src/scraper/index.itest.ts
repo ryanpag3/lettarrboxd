@@ -117,5 +117,21 @@ describe('scraper index integration tests', () => {
       expect(firstMovie).toHaveProperty('slug');
       expect(firstMovie).toHaveProperty('tmdbId');
     });
+
+    it('should fetch movies from popular movies URL', async () => {
+      // Using popular movies page
+      const movies = await fetchMoviesFromUrl('https://letterboxd.com/films/popular');
+
+      expect(movies).toBeDefined();
+      expect(Array.isArray(movies)).toBe(true);
+      expect(movies.length).toBeGreaterThan(0);
+
+      // Verify structure of returned movies
+      const firstMovie = movies[0];
+      expect(firstMovie).toHaveProperty('id');
+      expect(firstMovie).toHaveProperty('name');
+      expect(firstMovie).toHaveProperty('slug');
+      expect(firstMovie).toHaveProperty('tmdbId');
+    });
   });
 });
