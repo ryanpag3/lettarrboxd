@@ -1,10 +1,8 @@
-import schedule from 'node-schedule';
 import { main, startScheduledMonitoring } from './index';
 import * as scraperModule from './scraper';
 import * as radarrModule from './api/radarr';
 
 // Mock dependencies
-jest.mock('node-schedule');
 jest.mock('./util/env', () => ({
   CHECK_INTERVAL_MINUTES: 10,
   LETTERBOXD_URL: 'https://letterboxd.com/user/watchlist',
@@ -19,12 +17,22 @@ jest.mock('./scraper');
 jest.mock('./api/radarr');
 
 describe('main application', () => {
+  let setIntervalSpy: jest.SpyInstance;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.useFakeTimers();
+    setIntervalSpy = jest.spyOn(global, 'setInterval');
+  });
+
+  afterEach(() => {
+    jest.clearAllTimers();
+    jest.useRealTimers();
+    setIntervalSpy.mockRestore();
   });
 
   describe('startScheduledMonitoring', () => {
-    it('should schedule a job with correct recurrence rule', async () => {
+    it('should run immediately and schedule interval', async () => {
       const mockMovies = [
         {
           id: 1,
@@ -39,23 +47,16 @@ describe('main application', () => {
       (scraperModule.fetchMoviesFromUrl as jest.Mock).mockResolvedValue(mockMovies);
       (radarrModule.upsertMovies as jest.Mock).mockResolvedValue(undefined);
 
-      const mockScheduleJob = jest.fn();
-      (schedule.scheduleJob as jest.Mock) = mockScheduleJob;
-      (schedule.RecurrenceRule as any) = jest.fn().mockImplementation(() => ({
-        minute: undefined,
-      }));
-
       startScheduledMonitoring();
 
-      // Verify RecurrenceRule was created
-      expect(schedule.RecurrenceRule).toHaveBeenCalled();
+      // Wait for the immediate run to complete without advancing timers
+      await Promise.resolve();
 
-      // Verify scheduleJob was called
-      expect(mockScheduleJob).toHaveBeenCalled();
+      expect(scraperModule.fetchMoviesFromUrl).toHaveBeenCalledTimes(1);
+      expect(radarrModule.upsertMovies).toHaveBeenCalledTimes(1);
 
-      // Verify run was called immediately
-      await new Promise(resolve => setTimeout(resolve, 100));
-      expect(scraperModule.fetchMoviesFromUrl).toHaveBeenCalled();
+      // Verify setInterval was called with correct interval (10 minutes = 600000ms)
+      expect(setIntervalSpy).toHaveBeenCalledWith(expect.any(Function), 600000);
     });
 
     it('should fetch movies and upsert them during run', async () => {
@@ -81,19 +82,10 @@ describe('main application', () => {
       (scraperModule.fetchMoviesFromUrl as jest.Mock).mockResolvedValue(mockMovies);
       (radarrModule.upsertMovies as jest.Mock).mockResolvedValue(undefined);
 
-      // Import the run function by triggering startScheduledMonitoring
-      const mockScheduleJob = jest.fn((rule, callback) => {
-        // Don't execute the scheduled callback in tests
-      });
-      (schedule.scheduleJob as jest.Mock) = mockScheduleJob;
-      (schedule.RecurrenceRule as any) = jest.fn().mockImplementation(() => ({
-        minute: undefined,
-      }));
-
       startScheduledMonitoring();
 
       // Wait for the immediate run to complete
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await Promise.resolve();
 
       expect(scraperModule.fetchMoviesFromUrl).toHaveBeenCalledWith(
         'https://letterboxd.com/user/watchlist'
@@ -101,7 +93,7 @@ describe('main application', () => {
       expect(radarrModule.upsertMovies).toHaveBeenCalledWith(mockMovies);
     });
 
-    it('should call fetchMoviesFromUrl and upsertMovies during scheduled run', async () => {
+    it('should call fetchMoviesFromUrl and upsertMovies on interval', async () => {
       const mockMovies = [
         {
           id: 1,
@@ -116,33 +108,23 @@ describe('main application', () => {
       (scraperModule.fetchMoviesFromUrl as jest.Mock).mockResolvedValue(mockMovies);
       (radarrModule.upsertMovies as jest.Mock).mockResolvedValue(undefined);
 
-      let scheduledCallback: any = null;
-      const mockScheduleJob = jest.fn((rule: any, callback: any) => {
-        scheduledCallback = callback;
-      });
-      (schedule.scheduleJob as jest.Mock) = mockScheduleJob;
-      (schedule.RecurrenceRule as any) = jest.fn().mockImplementation(() => ({
-        minute: undefined,
-      }));
-
       startScheduledMonitoring();
 
-      // Wait for immediate run to complete
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Wait for immediate run
+      await Promise.resolve();
 
-      // Clear mocks to test scheduled callback
+      // Clear mocks to test interval callback
       jest.clearAllMocks();
       (scraperModule.fetchMoviesFromUrl as jest.Mock).mockResolvedValue(mockMovies);
       (radarrModule.upsertMovies as jest.Mock).mockResolvedValue(undefined);
 
-      // Execute the scheduled callback
-      if (scheduledCallback) {
-        await scheduledCallback();
-      }
+      // Fast-forward time by 10 minutes and run the interval callback
+      jest.advanceTimersByTime(600000);
+      await Promise.resolve();
 
-      // Verify the scheduled callback also calls the functions
-      expect(scraperModule.fetchMoviesFromUrl).toHaveBeenCalled();
-      expect(radarrModule.upsertMovies).toHaveBeenCalled();
+      // Verify the interval callback also calls the functions
+      expect(scraperModule.fetchMoviesFromUrl).toHaveBeenCalledTimes(1);
+      expect(radarrModule.upsertMovies).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -162,16 +144,12 @@ describe('main application', () => {
       (scraperModule.fetchMoviesFromUrl as jest.Mock).mockResolvedValue(mockMovies);
       (radarrModule.upsertMovies as jest.Mock).mockResolvedValue(undefined);
 
-      const mockScheduleJob = jest.fn();
-      (schedule.scheduleJob as jest.Mock) = mockScheduleJob;
-      (schedule.RecurrenceRule as any) = jest.fn().mockImplementation(() => ({
-        minute: undefined,
-      }));
-
       await main();
+      await Promise.resolve();
 
-      expect(schedule.RecurrenceRule).toHaveBeenCalled();
-      expect(mockScheduleJob).toHaveBeenCalled();
+      expect(setIntervalSpy).toHaveBeenCalled();
+      expect(scraperModule.fetchMoviesFromUrl).toHaveBeenCalled();
+      expect(radarrModule.upsertMovies).toHaveBeenCalled();
     });
   });
 });

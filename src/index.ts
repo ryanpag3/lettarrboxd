@@ -1,21 +1,23 @@
 require('dotenv').config();
 
 
-import schedule from 'node-schedule';
 import env from './util/env';
 import logger from './util/logger';
 import { fetchMoviesFromUrl } from './scraper';
 import { upsertMovies } from './api/radarr';
 
 function startScheduledMonitoring(): void {
-  const rule = new schedule.RecurrenceRule();
-  rule.minute = env.CHECK_INTERVAL_MINUTES;
+  const intervalMs = env.CHECK_INTERVAL_MINUTES * 60 * 1000;
 
+  logger.info(`Starting scheduled monitoring. Will check every ${env.CHECK_INTERVAL_MINUTES} minutes.`);
+
+  // Run immediately on startup
   run();
 
-  schedule.scheduleJob(rule, async () => {
+  // Then run on interval
+  setInterval(async () => {
     await run();
-  });
+  }, intervalMs);
 }
 
 async function run() {
