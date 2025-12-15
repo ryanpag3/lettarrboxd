@@ -21,7 +21,6 @@
     "bluebird": "^3.7.2",
     "cheerio": "^1.1.0",
     "dotenv": "^17.2.0",
-    "node-schedule": "^2.1.1",
     "nodemon": "^3.1.10",
     "pino": "^9.7.0",
     "pino-pretty": "^13.0.0",
@@ -34,7 +33,6 @@
     "@types/express": "^5.0.3",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.0.15",
-    "@types/node-schedule": "^2.1.8",
     "express": "^5.1.0",
     "jest": "^30.0.4",
     "ts-jest": "^29.4.0"
