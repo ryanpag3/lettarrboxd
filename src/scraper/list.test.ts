@@ -1,5 +1,6 @@
 import { ListScraper } from './list';
 import * as movieModule from './movie';
+import { fetchHtml } from '../util/http-client';
 
 // Mock the logger
 jest.mock('../util/logger', () => ({
@@ -12,8 +13,8 @@ jest.mock('../util/logger', () => ({
 // Mock the movie module
 jest.mock('./movie');
 
-// Mock fetch globally
-global.fetch = jest.fn();
+// Mock the http-client module
+jest.mock('../util/http-client');
 
 describe('ListScraper', () => {
   beforeEach(() => {
@@ -31,9 +32,9 @@ describe('ListScraper', () => {
         </html>
       `;
 
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        text: async () => mockHtml,
+      (fetchHtml as jest.Mock).mockResolvedValueOnce({
+        html: mockHtml,
+        statusCode: 200,
       });
 
       const mockMovie1 = {
@@ -64,7 +65,7 @@ describe('ListScraper', () => {
       expect(movies).toHaveLength(2);
       expect(movies[0]).toEqual(mockMovie1);
       expect(movies[1]).toEqual(mockMovie2);
-      expect(global.fetch).toHaveBeenCalledTimes(1);
+      expect(fetchHtml).toHaveBeenCalledTimes(1);
     });
 
     it('should handle pagination across multiple pages', async () => {
@@ -87,14 +88,14 @@ describe('ListScraper', () => {
         </html>
       `;
 
-      (global.fetch as jest.Mock)
+      (fetchHtml as jest.Mock)
         .mockResolvedValueOnce({
-          ok: true,
-          text: async () => page1Html,
+          html: page1Html,
+          statusCode: 200,
         })
         .mockResolvedValueOnce({
-          ok: true,
-          text: async () => page2Html,
+          html: page2Html,
+          statusCode: 200,
         });
 
       const mockMovie1 = {
@@ -123,8 +124,8 @@ describe('ListScraper', () => {
       const movies = await scraper.getMovies();
 
       expect(movies).toHaveLength(2);
-      expect(global.fetch).toHaveBeenCalledTimes(2);
-      expect(global.fetch).toHaveBeenNthCalledWith(
+      expect(fetchHtml).toHaveBeenCalledTimes(2);
+      expect(fetchHtml).toHaveBeenNthCalledWith(
         2,
         'https://letterboxd.com/user/watchlist/page/2/'
       );
@@ -141,9 +142,9 @@ describe('ListScraper', () => {
         </html>
       `;
 
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        text: async () => mockHtml,
+      (fetchHtml as jest.Mock).mockResolvedValueOnce({
+        html: mockHtml,
+        statusCode: 200,
       });
 
       const mockMovie1 = {
@@ -184,9 +185,9 @@ describe('ListScraper', () => {
         </html>
       `;
 
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        text: async () => mockHtml,
+      (fetchHtml as jest.Mock).mockResolvedValueOnce({
+        html: mockHtml,
+        statusCode: 200,
       });
 
       const mockMovie = {
@@ -207,20 +208,19 @@ describe('ListScraper', () => {
       );
       await scraper.getMovies();
 
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(fetchHtml).toHaveBeenCalledWith(
         'https://letterboxd.com/user/watchlist/by/date-earliest/'
       );
     });
 
     it('should throw error when page fetch fails', async () => {
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: false,
-        status: 500,
-      });
+      (fetchHtml as jest.Mock).mockRejectedValueOnce(
+        new Error('HTTP request failed: 500 Internal Server Error')
+      );
 
       const scraper = new ListScraper('https://letterboxd.com/user/watchlist/');
 
-      await expect(scraper.getMovies()).rejects.toThrow('Failed to fetch list page: 500');
+      await expect(scraper.getMovies()).rejects.toThrow('HTTP request failed: 500 Internal Server Error');
     });
 
     it('should handle empty movie list', async () => {
@@ -232,9 +232,9 @@ describe('ListScraper', () => {
         </html>
       `;
 
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        text: async () => mockHtml,
+      (fetchHtml as jest.Mock).mockResolvedValueOnce({
+        html: mockHtml,
+        statusCode: 200,
       });
 
       const scraper = new ListScraper('https://letterboxd.com/user/watchlist/');

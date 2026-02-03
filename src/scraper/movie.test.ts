@@ -1,4 +1,5 @@
 import { getMovie } from './movie';
+import { fetchHtml } from '../util/http-client';
 
 // Mock the logger to avoid console output during tests
 jest.mock('../util/logger', () => ({
@@ -8,8 +9,8 @@ jest.mock('../util/logger', () => ({
   error: jest.fn(),
 }));
 
-// Mock fetch globally
-global.fetch = jest.fn();
+// Mock the http-client module
+jest.mock('../util/http-client');
 
 describe('movie scraper', () => {
   beforeEach(() => {
@@ -32,9 +33,9 @@ describe('movie scraper', () => {
         </html>
       `;
 
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        text: async () => mockHtml,
+      (fetchHtml as jest.Mock).mockResolvedValueOnce({
+        html: mockHtml,
+        statusCode: 200,
       });
 
       const result = await getMovie('/film/the-matrix/');
@@ -48,7 +49,7 @@ describe('movie scraper', () => {
         slug: '/film/the-matrix/',
       });
 
-      expect(global.fetch).toHaveBeenCalledWith('https://letterboxd.com/film/the-matrix/');
+      expect(fetchHtml).toHaveBeenCalledWith('https://letterboxd.com/film/the-matrix/');
     });
 
     it('should handle missing TMDB ID gracefully', async () => {
@@ -64,9 +65,9 @@ describe('movie scraper', () => {
         </html>
       `;
 
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        text: async () => mockHtml,
+      (fetchHtml as jest.Mock).mockResolvedValueOnce({
+        html: mockHtml,
+        statusCode: 200,
       });
 
       const result = await getMovie('/film/some-show/');
@@ -88,9 +89,9 @@ describe('movie scraper', () => {
         </html>
       `;
 
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        text: async () => mockHtml,
+      (fetchHtml as jest.Mock).mockResolvedValueOnce({
+        html: mockHtml,
+        statusCode: 200,
       });
 
       const result = await getMovie('/film/obscure-film/');
@@ -112,9 +113,9 @@ describe('movie scraper', () => {
         </html>
       `;
 
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        text: async () => mockHtml,
+      (fetchHtml as jest.Mock).mockResolvedValueOnce({
+        html: mockHtml,
+        statusCode: 200,
       });
 
       const result = await getMovie('/film/future-film/');
@@ -123,14 +124,12 @@ describe('movie scraper', () => {
     });
 
     it('should throw error when fetch fails', async () => {
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: false,
-        status: 404,
-        statusText: 'Not Found',
-      });
+      (fetchHtml as jest.Mock).mockRejectedValueOnce(
+        new Error('HTTP request failed: 404 Not Found')
+      );
 
       await expect(getMovie('/film/nonexistent/')).rejects.toThrow(
-        'Failed to fetch movie page: 404 Not Found'
+        'HTTP request failed: 404 Not Found'
       );
     });
 
@@ -143,9 +142,9 @@ describe('movie scraper', () => {
         </html>
       `;
 
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        text: async () => mockHtml,
+      (fetchHtml as jest.Mock).mockResolvedValueOnce({
+        html: mockHtml,
+        statusCode: 200,
       });
 
       await expect(getMovie('/film/broken-film/')).rejects.toThrow(
@@ -165,14 +164,14 @@ describe('movie scraper', () => {
         </html>
       `;
 
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        text: async () => mockHtml,
+      (fetchHtml as jest.Mock).mockResolvedValueOnce({
+        html: mockHtml,
+        statusCode: 200,
       });
 
       await getMovie('/film/test-movie/');
 
-      expect(global.fetch).toHaveBeenCalledWith('https://letterboxd.com/film/test-movie/');
+      expect(fetchHtml).toHaveBeenCalledWith('https://letterboxd.com/film/test-movie/');
     });
 
     it('should handle TMDB TV show link (no movie ID)', async () => {
@@ -188,9 +187,9 @@ describe('movie scraper', () => {
         </html>
       `;
 
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        text: async () => mockHtml,
+      (fetchHtml as jest.Mock).mockResolvedValueOnce({
+        html: mockHtml,
+        statusCode: 200,
       });
 
       const result = await getMovie('/film/tv-show/');
@@ -211,9 +210,9 @@ describe('movie scraper', () => {
         </html>
       `;
 
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        text: async () => mockHtml,
+      (fetchHtml as jest.Mock).mockResolvedValueOnce({
+        html: mockHtml,
+        statusCode: 200,
       });
 
       const result = await getMovie('/film/movie/');
@@ -234,9 +233,9 @@ describe('movie scraper', () => {
         </html>
       `;
 
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        text: async () => mockHtml,
+      (fetchHtml as jest.Mock).mockResolvedValueOnce({
+        html: mockHtml,
+        statusCode: 200,
       });
 
       const result = await getMovie('/film/movie/');

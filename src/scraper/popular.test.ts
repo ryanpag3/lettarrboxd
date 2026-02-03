@@ -1,5 +1,6 @@
 import { PopularScraper } from './popular';
 import { getMovie } from './movie';
+import { fetchHtml } from '../util/http-client';
 
 // Mock the logger
 jest.mock('../util/logger', () => ({
@@ -12,8 +13,8 @@ jest.mock('../util/logger', () => ({
 // Mock the movie module
 jest.mock('./movie');
 
-// Mock global fetch
-global.fetch = jest.fn();
+// Mock the http-client module
+jest.mock('../util/http-client');
 
 describe('PopularScraper', () => {
   beforeEach(() => {
@@ -27,9 +28,9 @@ describe('PopularScraper', () => {
         <div class="react-component" data-target-link="/film/movie2/"></div>
       `;
 
-      (global.fetch as jest.Mock).mockResolvedValue({
-        ok: true,
-        text: async () => mockHtml,
+      (fetchHtml as jest.Mock).mockResolvedValue({
+        html: mockHtml,
+        statusCode: 200,
       });
 
       (getMovie as jest.Mock).mockResolvedValue({
@@ -45,7 +46,7 @@ describe('PopularScraper', () => {
       await scraper.getMovies();
 
       // Verify fetch was called with AJAX URL
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(fetchHtml).toHaveBeenCalledWith(
         'https://letterboxd.com/films/ajax/popular/'
       );
     });
@@ -55,9 +56,9 @@ describe('PopularScraper', () => {
         <div class="react-component" data-target-link="/film/movie1/"></div>
       `;
 
-      (global.fetch as jest.Mock).mockResolvedValue({
-        ok: true,
-        text: async () => mockHtml,
+      (fetchHtml as jest.Mock).mockResolvedValue({
+        html: mockHtml,
+        statusCode: 200,
       });
 
       (getMovie as jest.Mock).mockResolvedValue({
@@ -73,7 +74,7 @@ describe('PopularScraper', () => {
       await scraper.getMovies();
 
       // Verify fetch was called with properly formatted AJAX URL
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(fetchHtml).toHaveBeenCalledWith(
         'https://letterboxd.com/films/ajax/popular/'
       );
     });
@@ -83,9 +84,9 @@ describe('PopularScraper', () => {
         <div class="react-component" data-target-link="/film/movie1/"></div>
       `;
 
-      (global.fetch as jest.Mock).mockResolvedValue({
-        ok: true,
-        text: async () => mockHtml,
+      (fetchHtml as jest.Mock).mockResolvedValue({
+        html: mockHtml,
+        statusCode: 200,
       });
 
       (getMovie as jest.Mock).mockResolvedValue({
@@ -101,7 +102,7 @@ describe('PopularScraper', () => {
       await scraper.getMovies();
 
       // Should use the URL as-is
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(fetchHtml).toHaveBeenCalledWith(
         'https://letterboxd.com/films/ajax/popular/'
       );
     });
@@ -121,9 +122,9 @@ describe('PopularScraper', () => {
         <div class="react-component" data-target-link="/film/movie3/"></div>
       `;
 
-      (global.fetch as jest.Mock).mockResolvedValue({
-        ok: true,
-        text: async () => mockHtml,
+      (fetchHtml as jest.Mock).mockResolvedValue({
+        html: mockHtml,
+        statusCode: 200,
       });
 
       const mockMovie = {
@@ -156,9 +157,9 @@ describe('PopularScraper', () => {
         <div class="react-component" data-target-link="/film/movie5/"></div>
       `;
 
-      (global.fetch as jest.Mock).mockResolvedValue({
-        ok: true,
-        text: async () => mockHtml,
+      (fetchHtml as jest.Mock).mockResolvedValue({
+        html: mockHtml,
+        statusCode: 200,
       });
 
       const mockMovie = {
@@ -191,14 +192,14 @@ describe('PopularScraper', () => {
         <div class="react-component" data-target-link="/film/movie2/"></div>
       `;
 
-      (global.fetch as jest.Mock)
+      (fetchHtml as jest.Mock)
         .mockResolvedValueOnce({
-          ok: true,
-          text: async () => mockHtml1,
+          html: mockHtml1,
+          statusCode: 200,
         })
         .mockResolvedValueOnce({
-          ok: true,
-          text: async () => mockHtml2,
+          html: mockHtml2,
+          statusCode: 200,
         });
 
       (getMovie as jest.Mock).mockResolvedValue({
@@ -213,19 +214,18 @@ describe('PopularScraper', () => {
       const scraper = new PopularScraper('https://letterboxd.com/films/popular');
       const movies = await scraper.getMovies();
 
-      expect(global.fetch).toHaveBeenCalledTimes(2);
+      expect(fetchHtml).toHaveBeenCalledTimes(2);
       expect(movies).toHaveLength(2);
     });
 
     it('should throw error for fetch failure', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
-        ok: false,
-        status: 404,
-      });
+      (fetchHtml as jest.Mock).mockRejectedValue(
+        new Error('HTTP request failed: 404 Not Found')
+      );
 
       const scraper = new PopularScraper('https://letterboxd.com/films/popular');
 
-      await expect(scraper.getMovies()).rejects.toThrow('Failed to fetch popular movies page: 404');
+      await expect(scraper.getMovies()).rejects.toThrow('HTTP request failed: 404 Not Found');
     });
   });
 });

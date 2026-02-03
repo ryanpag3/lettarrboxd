@@ -4,6 +4,7 @@ import { LetterboxdMovie, LETTERBOXD_BASE_URL } from ".";
 import { getMovie } from './movie';
 import logger from '../util/logger';
 import Scraper from './scraper.interface';
+import { fetchHtml } from '../util/http-client';
 
 export class ListScraper implements Scraper {
     constructor(private url: string, private take?: number, private strategy?: 'oldest' | 'newest') {}
@@ -33,13 +34,9 @@ export class ListScraper implements Scraper {
         
         while (currentUrl) {
             logger.debug(`Fetching page: ${currentUrl}`);
-            
-            const response = await fetch(currentUrl);
-            if (!response.ok) {
-                throw new Error(`Failed to fetch list page: ${response.status}`);
-            }
-            
-            const html = await response.text();
+
+            const response = await fetchHtml(currentUrl);
+            const html = response.html;
             const pageLinks = this.getMovieLinksFromHtml(html);
             allLinks.push(...pageLinks);
             

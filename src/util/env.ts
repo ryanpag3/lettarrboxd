@@ -14,7 +14,10 @@ const envSchema = z.object({
   CHECK_INTERVAL_MINUTES: z.string().default('10').transform(Number).pipe(z.number().min(10)),
   LETTERBOXD_TAKE_AMOUNT: z.string().optional().transform(val => val ? Number(val) : undefined).pipe(z.number().positive().optional()),
   LETTERBOXD_TAKE_STRATEGY: z.enum(['oldest', 'newest']).optional(),
-  DRY_RUN: z.string().default('false').transform(val => val.toLowerCase() === 'true')
+  DRY_RUN: z.string().default('false').transform(val => val.toLowerCase() === 'true'),
+  FLARESOLVERR_URL: z.string().url().optional(),
+  FLARESOLVERR_MAX_TIMEOUT: z.string().default('60000').transform(Number).pipe(z.number().min(10000).max(300000)),
+  FLARESOLVERR_SESSION: z.string().optional(),
 }).refine(data => {
   const hasTakeAmount = data.LETTERBOXD_TAKE_AMOUNT !== undefined;
   const hasTakeStrategy = data.LETTERBOXD_TAKE_STRATEGY !== undefined;

@@ -229,6 +229,53 @@ docker run -d \
 | `LETTERBOXD_TAKE_STRATEGY` | - | Movie selection strategy: `newest` or `oldest` (requires `LETTERBOXD_TAKE_AMOUNT`) |
 | `DRY_RUN` | `false` | When `true`, logs what would be added to Radarr without making actual API calls |
 | `DATA_DIR` | `/data` | Directory for storing application data. You generally do not need to worry about this. |
+| `FLARESOLVERR_URL` | - | FlareSolverr API URL for bypassing Cloudflare protection (e.g., `http://flaresolverr:8191/v1`) |
+| `FLARESOLVERR_MAX_TIMEOUT` | `60000` | Max timeout in milliseconds for FlareSolverr requests (10000-300000) |
+| `FLARESOLVERR_SESSION` | - | Optional session name for persistent FlareSolverr browser instance |
+
+## FlareSolverr Support (Optional)
+
+If Letterboxd is blocking requests due to Cloudflare protection, you can use [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr) to bypass the challenge. FlareSolverr is a proxy server that uses a headless browser to solve Cloudflare challenges.
+
+### When to Use FlareSolverr
+
+You typically only need FlareSolverr if you're experiencing:
+- HTTP 403 Forbidden errors when scraping Letterboxd
+- Cloudflare challenge pages blocking requests
+- Captcha challenges during scraping
+
+### Docker Compose Example with FlareSolverr
+
+```yaml
+services:
+  lettarrboxd:
+    image: ryanpage/lettarrboxd:latest
+    container_name: lettarrboxd
+    environment:
+      - LETTERBOXD_URL=https://letterboxd.com/your_username/watchlist/
+      - RADARR_API_URL=http://radarr:7878
+      - RADARR_API_KEY=your_api_key
+      - RADARR_QUALITY_PROFILE=HD-1080p
+      - FLARESOLVERR_URL=http://flaresolverr:8191/v1
+    depends_on:
+      - flaresolverr
+    restart: unless-stopped
+
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    environment:
+      - LOG_LEVEL=info
+    ports:
+      - "8191:8191"
+    restart: unless-stopped
+```
+
+### Notes
+
+- FlareSolverr uses significant memory as it runs a full browser instance
+- When `FLARESOLVERR_URL` is not set, the application uses direct HTTP requests (default behavior)
+- The `FLARESOLVERR_SESSION` option can be used to maintain a persistent browser session, which may improve performance for repeated requests
 
 ## Development
 

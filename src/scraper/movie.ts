@@ -1,6 +1,7 @@
 import * as cheerio from 'cheerio';
 import { LETTERBOXD_BASE_URL, LetterboxdMovie } from ".";
 import logger from '../util/logger';
+import { fetchHtml } from '../util/http-client';
 
 /**
  * Obtain details of a movie.
@@ -8,14 +9,9 @@ import logger from '../util/logger';
  */
 export async function getMovie(link: string): Promise<LetterboxdMovie> {
     const movieUrl = new URL(link, LETTERBOXD_BASE_URL).toString();
-    
-    const response = await fetch(movieUrl);
-    if (!response.ok) {
-        throw new Error(`Failed to fetch movie page: ${response.status} ${response.statusText}`);
-    }
-    
-    const html = await response.text();
-    return extractMovieFromHtml(link, html);
+
+    const response = await fetchHtml(movieUrl);
+    return extractMovieFromHtml(link, response.html);
 }
 
 function extractMovieFromHtml(slug: string, html: string): LetterboxdMovie {
