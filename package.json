@@ -10,11 +10,11 @@
     "start": "node dist/index.js",
     "start:dev": "nodemon src/index.ts",
     "build": "tsc",
-    "test": "jest",
+    "test": "./scripts/run-with-flaresolverr.sh",
     "test:unit": "jest --testPathIgnorePatterns=itest",
-    "test:integration": "./scripts/run-integration-tests.sh",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:integration": "./scripts/run-with-flaresolverr.sh --testPathPatterns=itest",
+    "test:watch": "./scripts/run-with-flaresolverr.sh --watch",
+    "test:coverage": "./scripts/run-with-flaresolverr.sh --coverage"
   },
   "dependencies": {
     "axios": "^1.10.0",
