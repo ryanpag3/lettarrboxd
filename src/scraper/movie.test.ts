@@ -22,7 +22,7 @@ describe('movie scraper', () => {
         <html>
           <body>
             <h1 class="primaryname">The Matrix</h1>
-            <div class="film-poster" data-film-id="12345">
+            <div class="film-poster" data-resolvable-poster-path="{&quot;postered&quot;:{&quot;uid&quot;:&quot;film:12345&quot;}}">
               <img src="poster.jpg" />
             </div>
             <a data-track-action="TMDB" href="https://www.themoviedb.org/movie/603">Link</a>
