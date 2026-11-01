@@ -1,7 +1,7 @@
 services:
   # Single instance example - watches one list
   lettarrboxd:
-    image: ryanpage/lettarrboxd:latest
+    image: ghcr.io/ryanpag3/lettarrboxd:latest
     container_name: lettarrboxd
     environment:
       # Required variables
@@ -28,7 +28,7 @@ services:
   # Uncomment the services below to watch multiple lists simultaneously
 
   # lettarrboxd-watchlist:
-  #   image: ryanpage/lettarrboxd:latest
+  #   image: ghcr.io/ryanpag3/lettarrboxd:latest
   #   container_name: lettarrboxd-watchlist
   #   environment:
   #     - LETTERBOXD_URL=https://letterboxd.com/your_username/watchlist/
@@ -42,7 +42,7 @@ services:
   #   restart: unless-stopped
 
   # lettarrboxd-criterion:
-  #   image: ryanpage/lettarrboxd:latest
+  #   image: ghcr.io/ryanpag3/lettarrboxd:latest
   #   container_name: lettarrboxd-criterion
   #   environment:
   #     - LETTERBOXD_URL=https://letterboxd.com/criterion/list/the-criterion-collection/
@@ -56,7 +56,7 @@ services:
   #   restart: unless-stopped
 
   # lettarrboxd-nolan:
-  #   image: ryanpage/lettarrboxd:latest
+  #   image: ghcr.io/ryanpag3/lettarrboxd:latest
   #   container_name: lettarrboxd-nolan
   #   environment:
   #     - LETTERBOXD_URL=https://letterboxd.com/director/christopher-nolan/
