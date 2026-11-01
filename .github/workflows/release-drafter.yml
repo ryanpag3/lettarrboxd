@@ -4,12 +4,15 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    types: [opened, reopened, edited, synchronize, labeled, unlabeled]
 
 permissions:
   contents: read
 
 jobs:
   update_release_draft:
+    if: github.event_name == 'push'
     permissions:
       contents: write
       pull-requests: write
@@ -18,3 +21,34 @@ jobs:
       - uses: release-drafter/release-drafter@v6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  autolabel:
+    if: github.event_name == 'pull_request' && github.event.action != 'labeled' && github.event.action != 'unlabeled'
+    permissions:
+      contents: read
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: release-drafter/release-drafter/autolabeler@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  require-version-label:
+    if: github.event_name == 'pull_request'
+    needs: [autolabel]
+    # run even when autolabel was skipped (labeled/unlabeled events)
+    permissions:
+      pull-requests: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR has a version label
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          LABELS=$(gh pr view "${{ github.event.pull_request.number }}" \
+            --repo "${{ github.repository }}" --json labels --jq '.labels[].name')
+          echo "Labels: $LABELS"
+          if ! echo "$LABELS" | grep -q -x -E 'feature|enhancement|fix|bug|bugfix|chore|dependencies|documentation|docs|refactor|breaking|major|minor|patch'; then
+            echo "::error::PR needs one of: feature, fix, chore, documentation, breaking (or major/minor/patch)."
+            exit 1
+          fi

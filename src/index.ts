@@ -33,5 +33,6 @@ export { startScheduledMonitoring };
 
 // Only run main if this file is executed directly
 if (require.main === module) {
+  logger.info(`Lettarrboxd version ${process.env.APP_VERSION || 'dev'}`);
   main().catch(logger.error);
 }

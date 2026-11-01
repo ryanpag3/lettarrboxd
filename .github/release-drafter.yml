@@ -21,6 +21,27 @@ categories:
       - 'documentation'
       - 'docs'
 
+autolabeler:
+  - label: 'feature'
+    branch:
+      - '/^feature\/.+/'
+    title:
+      - '/^feat(\(.+\))?:/i'
+  - label: 'fix'
+    branch:
+      - '/^(defect|fix|hotfix)\/.+/'
+    title:
+      - '/^fix(\(.+\))?:/i'
+  - label: 'chore'
+    title:
+      - '/^(chore|refactor|ci|test|build)(\(.+\))?:/i'
+  - label: 'documentation'
+    title:
+      - '/^docs(\(.+\))?:/i'
+  - label: 'breaking'
+    title:
+      - '/^\w+(\(.+\))?!:/'
+
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 
 change-title-escapes: '\<*_&'

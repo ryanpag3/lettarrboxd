@@ -35,11 +35,7 @@ jobs:
           tags: |
             type=ref,event=branch,suffix=-{{sha}}
             type=ref,event=pr,suffix=-{{sha}}
-            type=semver,pattern=v{{version}},enable=${{ github.event_name == 'release' }}
-            type=semver,pattern=v{{major}}.{{minor}},enable=${{ github.event_name == 'release' }}
-            type=semver,pattern=v{{major}},enable=${{ github.event_name == 'release' }}
             type=raw,value=staging,enable=${{ github.ref == 'refs/heads/main' }}
-            type=raw,value=latest,enable=${{ github.event_name == 'release' }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
@@ -47,6 +43,8 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
+          build-args: |
+            APP_VERSION=${{ github.ref_name }}-${{ github.sha }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha

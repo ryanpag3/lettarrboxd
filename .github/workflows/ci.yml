@@ -4,13 +4,13 @@ on:
   push:
     branches:
       - main
-      - 'feature/**'
-      - 'defect/**'
   pull_request:
     branches:
       - main
-  release:
-    types: [published]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-and-test:

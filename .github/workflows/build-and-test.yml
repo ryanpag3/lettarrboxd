@@ -69,7 +69,7 @@ jobs:
           echo "  Functions: $FUNCTIONS%"
           echo "  Lines: $LINES%"
           echo ""
-          echo "Required Threshold: 85% for all metrics"
+          echo "Required Threshold: 85% for all metrics (enforced by jest coverageThreshold)"
 
       - name: Comment coverage on PR
         if: github.event_name == 'pull_request'

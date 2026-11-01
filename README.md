@@ -278,6 +278,14 @@ When `NODE_ENV=development`, the application:
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
+## Releasing
+
+1. Label every PR with `feature`, `fix`, `chore` or `breaking` (labels are applied automatically from the branch name or PR title where possible; a check fails PRs without one). The label decides the version bump.
+2. Merge to `main`. CI builds and tests the commit and pushes the `main-<sha>` and `staging` images, and Release Drafter updates the draft release.
+3. Publish the draft release **without editing its tag**. The Release workflow checks the tag is `vX.Y.Z` on `main`, confirms CI passed for that commit, and retags the already-built image as `vX.Y.Z`, `vX.Y`, `vX` and `latest`.
+
+If the Release workflow fails, fix the cause and re-run it; no image tags move until every check passes.
+
 ## Troubleshooting
 
 ### Common Issues

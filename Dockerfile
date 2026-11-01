@@ -38,6 +38,10 @@ RUN mkdir -p /data
 ENV NODE_ENV=production
 ENV DATA_DIR=/data
 
+# Release version (set at build time)
+ARG APP_VERSION=dev
+ENV APP_VERSION=$APP_VERSION
+
 # Create non-root user for security
 RUN addgroup -g 1001 -S lettarrboxd && \
     adduser -S lettarrboxd -u 1001 -G lettarrboxd
