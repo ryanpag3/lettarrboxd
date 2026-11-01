@@ -1,6 +1,7 @@
 import { main, startScheduledMonitoring } from './index';
 import * as scraperModule from './scraper';
 import * as radarrModule from './api/radarr';
+import logger from './util/logger';
 
 // Mock dependencies
 jest.mock('./util/env', () => ({
@@ -125,6 +126,24 @@ describe('main application', () => {
       // Verify the interval callback also calls the functions
       expect(scraperModule.fetchMoviesFromUrl).toHaveBeenCalledTimes(1);
       expect(radarrModule.upsertMovies).toHaveBeenCalledTimes(1);
+    });
+    it('should log and keep scheduling when a run fails', async () => {
+      const error = new Error('Could not get quality profile ID.');
+      (scraperModule.fetchMoviesFromUrl as jest.Mock).mockResolvedValue([]);
+      (radarrModule.upsertMovies as jest.Mock).mockRejectedValue(error);
+
+      startScheduledMonitoring();
+
+      // Let the immediate run settle
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(logger.error).toHaveBeenCalledWith({ err: error }, 'Sync run failed');
+
+      jest.advanceTimersByTime(600000);
+      await Promise.resolve();
+
+      expect(scraperModule.fetchMoviesFromUrl).toHaveBeenCalledTimes(2);
     });
   });
 

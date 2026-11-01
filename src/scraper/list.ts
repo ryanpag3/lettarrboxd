@@ -22,7 +22,7 @@ export class ListScraper implements Scraper {
             try {
                 return await getMovie(link);
             } catch (error) {
-                logger.error(`Failed to scrape movie ${link}, skipping.`, { error });
+                logger.error({ err: error }, `Failed to scrape movie ${link}, skipping.`);
                 return null;
             }
         }, {

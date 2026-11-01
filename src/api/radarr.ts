@@ -26,6 +26,25 @@ const axios = Axios.create({
     }
 });
 
+// Summarize an error for logging. Axios errors are reduced to the request and
+// response details; the raw error would include request headers (the API key).
+export function describeError(error: unknown): Record<string, unknown> {
+    if (Axios.isAxiosError(error)) {
+        return {
+            message: error.message,
+            code: error.code,
+            method: error.config?.method?.toUpperCase(),
+            url: error.config ? axios.getUri(error.config) : undefined,
+            status: error.response?.status,
+            data: error.response?.data
+        };
+    }
+    if (error instanceof Error) {
+        return { message: error.message, stack: error.stack };
+    }
+    return { message: String(error) };
+}
+
 export async function getQualityProfileId(profileName: string): Promise<number | null> {
     try {
         logger.debug(`Getting quality profile ID for: ${profileName}`);
@@ -38,12 +57,12 @@ export async function getQualityProfileId(profileName: string): Promise<number |
             logger.debug(`Found quality profile: ${profileName} (ID: ${profile.id})`);
             return profile.id;
         } else {
-            logger.error(`Quality profile not found: ${profileName}`);
-            logger.debug('Available profiles:', profiles.map((p: any) => p.name));
+            const available = profiles.map((p: any) => p.name);
+            logger.error({ available }, `Quality profile not found: ${profileName}`);
             return null;
         }
     } catch (error) {
-        logger.error('Error getting quality profiles:', error);
+        logger.error({ error: describeError(error) }, 'Error getting quality profiles from Radarr');
         return null;
     }
 }
@@ -62,7 +81,7 @@ export async function getRootFolder(): Promise<string | null> {
             return null;
         }
     } catch (error) {
-        logger.error('Error getting root folders:', error);
+        logger.error({ error: describeError(error) }, 'Error getting root folders from Radarr');
         return null;
     }
 }
@@ -77,7 +96,7 @@ export async function getRootFolderById(id: string) {
             return null;
         }
     } catch (e) {
-        logger.error(`Error getting root folder by id: ${id}`);
+        logger.error({ error: describeError(e) }, `Error getting root folder by id: ${id}`);
         return null;
     }
 }
@@ -103,7 +122,7 @@ export async function getOrCreateTag(tagName: string): Promise<number | null> {
         logger.info(`Created tag: ${tagName} (ID: ${createResponse.data.id})`);
         return createResponse.data.id;
     } catch (error) {
-        logger.error(`Error getting or creating tag ${tagName}:`, error);
+        logger.error({ error: describeError(error) }, `Error getting or creating tag ${tagName}`);
         return null;
     }
 }
@@ -181,19 +200,20 @@ export async function addMovie(movie: LetterboxdMovie, qualityProfileId: number,
         }
 
         if (env.DRY_RUN) {
-            logger.info(`[DRY RUN] Would add movie to Radarr: ${payload.title} (TMDB: ${payload.tmdbId})`, payload);
+            logger.info({ payload }, `[DRY RUN] Would add movie to Radarr: ${payload.title} (TMDB: ${payload.tmdbId})`);
             return;
         }
 
         const response = await axios.post('/api/v3/movie', payload);
 
-        logger.info(`Successfully added movie: ${payload.title}`, response.data);
+        logger.info(`Successfully added movie: ${payload.title}`);
+        logger.debug({ movie: response.data }, `Radarr response for ${payload.title}`);
         return response.data;
     } catch (e: any) {
         if (e.response?.status === 400 && (JSON.stringify(e.response?.data)).includes('This movie has already been added')) {
             logger.debug(`Movie ${movie.name} already exists in Radarr, skipping`);
             return;
         }
-        logger.error(`Error adding movie ${movie.name} (TMDB: ${movie.tmdbId}):`, e);
+        logger.error({ error: describeError(e) }, `Error adding movie ${movie.name} (TMDB: ${movie.tmdbId})`);
     }
 }
