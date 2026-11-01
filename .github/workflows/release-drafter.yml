@@ -4,7 +4,8 @@ on:
   push:
     branches:
       - main
-  pull_request:
+  # pull_request_target so fork PRs get a token that can add labels; no PR code is checked out
+  pull_request_target:
     types: [opened, reopened, edited, synchronize, labeled, unlabeled]
 
 permissions:
@@ -23,20 +24,22 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   autolabel:
-    if: github.event_name == 'pull_request' && github.event.action != 'labeled' && github.event.action != 'unlabeled'
+    if: github.event_name == 'pull_request_target' && github.event.action != 'labeled' && github.event.action != 'unlabeled'
     permissions:
       contents: read
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
-      - uses: release-drafter/release-drafter/autolabeler@v6
+      - uses: release-drafter/release-drafter@v6
+        with:
+          disable-releaser: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   require-version-label:
-    if: github.event_name == 'pull_request'
+    # always(): still run when autolabel is skipped (labeled/unlabeled events)
+    if: ${{ always() && github.event_name == 'pull_request_target' }}
     needs: [autolabel]
-    # run even when autolabel was skipped (labeled/unlabeled events)
     permissions:
       pull-requests: read
     runs-on: ubuntu-latest
