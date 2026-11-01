@@ -222,7 +222,7 @@ docker run -d \
 |----------|---------|-------------|
 | `CHECK_INTERVAL_MINUTES` | `10` | How often to check for new movies (minimum 10) |
 | `RADARR_MINIMUM_AVAILABILITY` | `released` | When movie becomes available (`announced`, `inCinemas`, `released`) |
-| `RADARR_ROOT_FOLDER_ID` | - | Specific root folder ID to use in Radarr (uses first available if not set) |
+| `RADARR_ROOT_FOLDER_ID` | - | Numeric ID of the Radarr root folder to use, e.g. `2` — not the folder path. Find it via `GET /api/v3/rootfolder` or by hovering the folder under Settings → Media Management in Radarr (the number at the end of the link). Uses the first available root folder if not set |
 | `RADARR_ADD_UNMONITORED` | `false` | When `true`, adds movies to Radarr in an unmonitored state |
 | `RADARR_TAGS` | - | Additional tags to apply to movies (comma-separated). Movies are always tagged with `letterboxd` |
 | `LETTERBOXD_TAKE_AMOUNT` | - | Number of movies to sync (requires `LETTERBOXD_TAKE_STRATEGY`) |

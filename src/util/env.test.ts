@@ -117,6 +117,33 @@ describe('env', () => {
     expect(env.RADARR_ROOT_FOLDER_ID).toBe('1');
   });
 
+  it('should reject a non-numeric RADARR_ROOT_FOLDER_ID', () => {
+    const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => {
+      throw new Error('process.exit called');
+    });
+    const mockConsoleError = jest.spyOn(console, 'error').mockImplementation();
+
+    process.env = {
+      NODE_ENV: 'test',
+      LETTERBOXD_URL: 'https://letterboxd.com/user/watchlist',
+      RADARR_API_URL: 'http://localhost:7878',
+      RADARR_API_KEY: 'test-api-key',
+      RADARR_QUALITY_PROFILE: 'HD-1080p',
+      RADARR_ROOT_FOLDER_ID: '/data/moviesB/[B Movie]',
+    };
+
+    expect(() => {
+      jest.isolateModules(() => {
+        require('./env');
+      });
+    }).toThrow('process.exit called');
+
+    expect(mockConsoleError).toHaveBeenCalledWith(expect.stringContaining('RADARR_ROOT_FOLDER_ID'));
+
+    mockExit.mockRestore();
+    mockConsoleError.mockRestore();
+  });
+
   it('should handle optional RADARR_TAGS', () => {
     process.env = {
       NODE_ENV: 'test',
