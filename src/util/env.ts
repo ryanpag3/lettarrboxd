@@ -8,7 +8,7 @@ const envSchema = z.object({
   RADARR_API_KEY: z.string(),
   RADARR_QUALITY_PROFILE: z.string(),
   RADARR_MINIMUM_AVAILABILITY: z.string().default('released'),
-  RADARR_ROOT_FOLDER_ID: z.string().optional(),
+  RADARR_ROOT_FOLDER_ID: z.string().regex(/^\d+$/, 'Must be the numeric root folder ID from Radarr, not a path (see README)').optional(),
   RADARR_TAGS: z.string().optional(),
   RADARR_ADD_UNMONITORED: z.string().default('false').transform(val => val.toLowerCase() === 'true'),
   CHECK_INTERVAL_MINUTES: z.string().default('10').transform(Number).pipe(z.number().min(10)),
