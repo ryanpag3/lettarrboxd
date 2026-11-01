@@ -13,6 +13,7 @@ env:
 jobs:
   promote:
     runs-on: ubuntu-latest
+    timeout-minutes: 40
     permissions:
       contents: read
       actions: read
@@ -41,17 +42,31 @@ jobs:
             exit 1
           fi
 
-      - name: Verify CI passed for the tagged commit
+      - name: Wait for CI on the tagged commit
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          COUNT=$(gh run list --repo "${{ github.repository }}" --workflow ci.yml \
-            --branch main --event push --commit "$GITHUB_SHA" \
-            --status success --json databaseId --jq 'length')
-          if [ "$COUNT" -lt 1 ]; then
-            echo "::error::No successful CI run on main for $GITHUB_SHA. Wait for CI or merge a fix, then re-run this workflow."
-            exit 1
-          fi
+          # Poll the push-to-main CI run for this commit (build, test and image push).
+          for i in $(seq 1 60); do
+            RUN=$(gh run list --repo "${{ github.repository }}" --workflow ci.yml \
+              --branch main --event push --commit "$GITHUB_SHA" \
+              --json status,conclusion,url --jq '.[0] // empty')
+            if [ -z "$RUN" ]; then
+              echo "No CI run found yet for $GITHUB_SHA (attempt $i)"
+            else
+              STATUS=$(echo "$RUN" | jq -r .status)
+              CONCLUSION=$(echo "$RUN" | jq -r .conclusion)
+              echo "CI run: $STATUS/$CONCLUSION $(echo "$RUN" | jq -r .url)"
+              if [ "$STATUS" = "completed" ]; then
+                if [ "$CONCLUSION" = "success" ]; then exit 0; fi
+                echo "::error::CI for $GITHUB_SHA finished with '$CONCLUSION'. Fix it and publish a new release."
+                exit 1
+              fi
+            fi
+            sleep 30
+          done
+          echo "::error::Timed out waiting for CI on $GITHUB_SHA"
+          exit 1
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
