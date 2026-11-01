@@ -64,7 +64,7 @@ docker run -d \
   -e RADARR_QUALITY_PROFILE="HD-1080p" \
   -e RADARR_TAGS="watchlist,must-watch" \
   -e DRY_RUN=false \
-  ryanpage/lettarrboxd:latest
+  ghcr.io/ryanpag3/lettarrboxd:latest
 ```
 
 For testing purposes, you can enable dry run mode:
@@ -76,7 +76,7 @@ docker run -d \
   -e RADARR_API_KEY=your_api_key \
   -e RADARR_QUALITY_PROFILE="HD-1080p" \
   -e DRY_RUN=true \
-  ryanpage/lettarrboxd:latest
+  ghcr.io/ryanpag3/lettarrboxd:latest
 ```
 See [docker-compose.yaml](./docker-compose.yaml) for complete example.
 
@@ -94,7 +94,7 @@ To monitor multiple Letterboxd lists simultaneously, deploy one lettarrboxd inst
 ```yaml
 services:
   lettarrboxd-watchlist:
-    image: ryanpage/lettarrboxd:latest
+    image: ghcr.io/ryanpag3/lettarrboxd:latest
     container_name: lettarrboxd-watchlist
     environment:
       - LETTERBOXD_URL=https://letterboxd.com/your_username/watchlist/
@@ -108,7 +108,7 @@ services:
     restart: unless-stopped
 
   lettarrboxd-criterion:
-    image: ryanpage/lettarrboxd:latest
+    image: ghcr.io/ryanpag3/lettarrboxd:latest
     container_name: lettarrboxd-criterion
     environment:
       - LETTERBOXD_URL=https://letterboxd.com/criterion/list/the-criterion-collection/
@@ -122,7 +122,7 @@ services:
     restart: unless-stopped
 
   lettarrboxd-nolan:
-    image: ryanpage/lettarrboxd:latest
+    image: ghcr.io/ryanpag3/lettarrboxd:latest
     container_name: lettarrboxd-nolan
     environment:
       - LETTERBOXD_URL=https://letterboxd.com/director/christopher-nolan/
@@ -149,7 +149,7 @@ docker run -d \
   -e RADARR_TAGS="watchlist,personal" \
   -e CHECK_INTERVAL_MINUTES=60 \
   -v ./data/watchlist:/data \
-  ryanpage/lettarrboxd:latest
+  ghcr.io/ryanpag3/lettarrboxd:latest
 
 # Watch the Criterion Collection
 docker run -d \
@@ -161,7 +161,7 @@ docker run -d \
   -e RADARR_TAGS="criterion,classics" \
   -e CHECK_INTERVAL_MINUTES=120 \
   -v ./data/criterion:/data \
-  ryanpage/lettarrboxd:latest
+  ghcr.io/ryanpag3/lettarrboxd:latest
 
 # Watch Christopher Nolan's filmography
 docker run -d \
@@ -173,7 +173,7 @@ docker run -d \
   -e RADARR_TAGS="nolan,director-filmography" \
   -e CHECK_INTERVAL_MINUTES=1440 \
   -v ./data/nolan:/data \
-  ryanpage/lettarrboxd:latest
+  ghcr.io/ryanpag3/lettarrboxd:latest
 ```
 
 ### Best Practices for Multi-List Setup
