@@ -21,7 +21,7 @@ describe('scraper index integration tests', () => {
     it('should fetch movies from a regular list URL', async () => {
       // Using Letterboxd's official Top 250 list
       const movies = await fetchMoviesFromUrl(
-        'https://letterboxd.com/dave/list/official-top-250-narrative-feature-films/'
+        'https://letterboxd.com/dave/list/imdb-top-250/'
       );
 
       expect(movies).toBeDefined();

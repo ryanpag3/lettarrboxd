@@ -7,9 +7,9 @@ describe('list scraper integration tests', () => {
   describe('ListScraper', () => {
     it('should fetch movies from a public Letterboxd list', async () => {
       // Using a well-known public list with stable content
-      // Letterboxd's official "Top 250 Narrative Features" list
+      // Dave's IMDb Top 250 list
       const scraper = new ListScraper(
-        'https://letterboxd.com/dave/list/official-top-250-narrative-feature-films/',
+        'https://letterboxd.com/dave/list/imdb-top-250/',
         5 // Only fetch first 5 to keep test fast
       );
 
@@ -38,7 +38,7 @@ describe('list scraper integration tests', () => {
     it('should respect the take limit parameter', async () => {
       const takeLimit = 3;
       const scraper = new ListScraper(
-        'https://letterboxd.com/dave/list/official-top-250-narrative-feature-films/',
+        'https://letterboxd.com/dave/list/imdb-top-250/',
         takeLimit
       );
 
@@ -50,7 +50,7 @@ describe('list scraper integration tests', () => {
 
     it('should handle oldest strategy', async () => {
       const scraper = new ListScraper(
-        'https://letterboxd.com/dave/list/official-top-250-narrative-feature-films/',
+        'https://letterboxd.com/dave/list/imdb-top-250/',
         2,
         'oldest'
       );
@@ -66,7 +66,7 @@ describe('list scraper integration tests', () => {
     it('should handle empty list gracefully', async () => {
       // Create a scraper for a potentially empty or very small list
       const scraper = new ListScraper(
-        'https://letterboxd.com/dave/list/official-top-250-narrative-feature-films/',
+        'https://letterboxd.com/dave/list/imdb-top-250/',
         0 // Take 0 movies
       );
 
