@@ -1,0 +1,33 @@
+name: Live Scraper Check
+
+# Runs the integration tests against the real Letterboxd site to detect
+# breakage from site changes or bot protection (e.g. Cloudflare 403s).
+on:
+  schedule:
+    # Run daily at 12:00 PM UTC
+    - cron: '0 12 * * *'
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  live-scraper:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      # Run serially so parallel suites don't burst requests at Letterboxd
+      - name: Run live integration tests
+        run: yarn test:integration --runInBand
+        env:
+          CI: true
