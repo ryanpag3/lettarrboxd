@@ -231,4 +231,28 @@ describe('env', () => {
     mockExit.mockRestore();
     mockConsoleError.mockRestore();
   });
+
+  it('should parse FlareSolverr settings', () => {
+    process.env = {
+      ...originalEnv,
+      FLARESOLVERR_URL: 'http://flaresolverr:8191',
+      FLARESOLVERR_MAX_TIMEOUT: '120000'
+    };
+
+    const env = require('./env').default;
+
+    expect(env.FLARESOLVERR_URL).toBe('http://flaresolverr:8191');
+    expect(env.FLARESOLVERR_MAX_TIMEOUT).toBe(120000);
+  });
+
+  it('should leave FlareSolverr disabled by default', () => {
+    process.env = { ...originalEnv };
+    delete process.env.FLARESOLVERR_URL;
+    delete process.env.FLARESOLVERR_MAX_TIMEOUT;
+
+    const env = require('./env').default;
+
+    expect(env.FLARESOLVERR_URL).toBeUndefined();
+    expect(env.FLARESOLVERR_MAX_TIMEOUT).toBe(60000);
+  });
 });

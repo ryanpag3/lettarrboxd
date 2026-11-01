@@ -228,6 +228,8 @@ docker run -d \
 | `LETTERBOXD_TAKE_AMOUNT` | - | Number of movies to sync (requires `LETTERBOXD_TAKE_STRATEGY`) |
 | `LETTERBOXD_TAKE_STRATEGY` | - | Movie selection strategy: `newest` or `oldest` (requires `LETTERBOXD_TAKE_AMOUNT`) |
 | `DRY_RUN` | `false` | When `true`, logs what would be added to Radarr without making actual API calls |
+| `FLARESOLVERR_URL` | - | Base URL of a [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr) instance, e.g. `http://flaresolverr:8191`. When set, all Letterboxd requests are proxied through it to get past Cloudflare challenges |
+| `FLARESOLVERR_MAX_TIMEOUT` | `60000` | Maximum time in milliseconds FlareSolverr may spend solving a challenge for a single request |
 | `DATA_DIR` | `/data` | Directory for storing application data. You generally do not need to worry about this. |
 
 ## Development

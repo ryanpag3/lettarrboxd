@@ -22,7 +22,16 @@ services:
       # Optional movie limiting (both required if using)
       # - LETTERBOXD_TAKE_AMOUNT=10
       # - LETTERBOXD_TAKE_STRATEGY=newest
+
+      # Optional FlareSolverr proxy for when Letterboxd blocks requests with Cloudflare
+      # (uncomment the flaresolverr service below as well)
+      # - FLARESOLVERR_URL=http://flaresolverr:8191
     restart: unless-stopped
+
+  # flaresolverr:
+  #   image: ghcr.io/flaresolverr/flaresolverr:latest
+  #   container_name: flaresolverr
+  #   restart: unless-stopped
 
   # Multi-list example - deploy one instance per list
   # Uncomment the services below to watch multiple lists simultaneously
