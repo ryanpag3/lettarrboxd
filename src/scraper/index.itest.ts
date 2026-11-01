@@ -1,5 +1,16 @@
 import { detectListType, fetchMoviesFromUrl, ListType } from './index';
 
+// Only scrape a handful of movies per list. Scraping every movie page of large
+// lists (and the endless popular list) is slow, especially through FlareSolverr.
+jest.mock('../util/env', () => ({
+  __esModule: true,
+  default: {
+    ...jest.requireActual('../util/env').default,
+    LETTERBOXD_TAKE_AMOUNT: 5,
+    LETTERBOXD_TAKE_STRATEGY: 'newest',
+  },
+}));
+
 describe('scraper index integration tests', () => {
   // Increase timeout for actual network requests
   jest.setTimeout(60000);

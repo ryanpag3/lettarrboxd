@@ -21,7 +21,7 @@ describe('CollectionsScraper', () => {
   });
 
   describe('URL transformation', () => {
-    it('should transform collections URL to AJAX endpoint', async () => {
+    it('should fetch the collection page directly', async () => {
       const mockHtml = `
         <div class="react-component" data-target-link="/film/movie1/"></div>
         <div class="react-component" data-target-link="/film/movie2/"></div>
@@ -44,9 +44,9 @@ describe('CollectionsScraper', () => {
       const scraper = new CollectionsScraper('https://letterboxd.com/films/in/the-dark-knight-collection/', 2);
       await scraper.getMovies();
 
-      // Verify fetch was called with AJAX URL
+      // Verify fetch was called with the collection URL
       expect(global.fetch).toHaveBeenCalledWith(
-        'https://letterboxd.com/films/ajax/in/the-dark-knight-collection/'
+        'https://letterboxd.com/films/in/the-dark-knight-collection/'
       );
     });
 
@@ -72,37 +72,9 @@ describe('CollectionsScraper', () => {
       const scraper = new CollectionsScraper('https://letterboxd.com/films/in/collection-name', 1);
       await scraper.getMovies();
 
-      // Verify fetch was called with properly formatted AJAX URL
+      // Verify fetch was called with a trailing slash added
       expect(global.fetch).toHaveBeenCalledWith(
-        'https://letterboxd.com/films/ajax/in/collection-name/'
-      );
-    });
-
-    it('should handle already-transformed AJAX URLs', async () => {
-      const mockHtml = `
-        <div class="react-component" data-target-link="/film/movie1/"></div>
-      `;
-
-      (global.fetch as jest.Mock).mockResolvedValue({
-        ok: true,
-        text: async () => mockHtml,
-      });
-
-      (getMovie as jest.Mock).mockResolvedValue({
-        id: 1,
-        name: 'Test Movie',
-        slug: '/film/movie1/',
-        tmdbId: '123',
-        imdbId: null,
-        publishedYear: null,
-      });
-
-      const scraper = new CollectionsScraper('https://letterboxd.com/films/ajax/in/collection-name/', 1);
-      await scraper.getMovies();
-
-      // Should use the URL as-is
-      expect(global.fetch).toHaveBeenCalledWith(
-        'https://letterboxd.com/films/ajax/in/collection-name/'
+        'https://letterboxd.com/films/in/collection-name/'
       );
     });
 
@@ -207,7 +179,7 @@ describe('CollectionsScraper', () => {
 
       // Verify fetch was called with sorting parameter
       expect(global.fetch).toHaveBeenCalledWith(
-        'https://letterboxd.com/films/ajax/in/collection/by/release-earliest/'
+        'https://letterboxd.com/films/in/collection/by/release-earliest/'
       );
     });
 
@@ -215,7 +187,7 @@ describe('CollectionsScraper', () => {
       const mockHtml1 = `
         <div class="react-component" data-target-link="/film/movie1/"></div>
         <div class="paginate-nextprev">
-          <a class="next" href="/films/ajax/popular/in/collection/page/2/">Next</a>
+          <a class="next" href="/films/in/collection/page/2/">Next</a>
         </div>
       `;
 

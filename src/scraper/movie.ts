@@ -41,7 +41,8 @@ function extractMovieFromHtml(slug: string, html: string): LetterboxdMovie {
 }
 
 function extractName($: cheerio.CheerioAPI): string {
-    const name = $('.primaryname').first().text().trim();
+    // Rendered pages (e.g. via FlareSolverr) use a non-breaking space before the last word
+    const name = $('.primaryname').first().text().replace(/\u00a0/g, ' ').trim();
     return name;
 }
 
