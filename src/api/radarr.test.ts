@@ -2,18 +2,23 @@
 const mockAxiosInstance = {
   get: jest.fn(),
   post: jest.fn(),
+  getUri: jest.fn((config: any) => `http://localhost:7878${config.url}`),
 };
 
 jest.mock('axios', () => {
+  const isAxiosError = (e: any) => e?.isAxiosError === true;
   return {
     create: jest.fn(() => mockAxiosInstance),
+    isAxiosError,
     default: {
       create: jest.fn(() => mockAxiosInstance),
+      isAxiosError,
     },
   };
 });
 
 // Mock logger
+import logger from '../util/logger';
 jest.mock('../util/logger', () => ({
   debug: jest.fn(),
   info: jest.fn(),
@@ -41,7 +46,17 @@ import {
   getAllRequiredTagIds,
   addMovie,
   upsertMovies,
+  describeError,
 } from './radarr';
+
+function makeAxiosError(status: number, data: unknown) {
+  return Object.assign(new Error(`Request failed with status code ${status}`), {
+    isAxiosError: true,
+    code: 'ERR_BAD_REQUEST',
+    config: { method: 'get', url: '/api/v3/qualityprofile', headers: { 'X-Api-Key': 'test-key' } },
+    response: { status, data },
+  });
+}
 
 describe('radarr API', () => {
   beforeEach(() => {
@@ -83,6 +98,59 @@ describe('radarr API', () => {
       const result = await getQualityProfileId('HD-1080p');
 
       expect(result).toBeNull();
+    });
+
+    it('should log available profile names when profile does not exist', async () => {
+      mockAxiosInstance.get.mockResolvedValueOnce({
+        data: [
+          { id: 1, name: 'SD' },
+          { id: 2, name: 'HD-1080p' },
+        ],
+      });
+
+      await getQualityProfileId('NonExistent');
+
+      expect(logger.error).toHaveBeenCalledWith(
+        { available: ['SD', 'HD-1080p'] },
+        'Quality profile not found: NonExistent'
+      );
+    });
+
+    it('should log the HTTP status and URL when the request fails', async () => {
+      mockAxiosInstance.get.mockRejectedValueOnce(makeAxiosError(401, { message: 'Unauthorized' }));
+
+      await getQualityProfileId('HD-1080p');
+
+      expect(logger.error).toHaveBeenCalledWith(
+        {
+          error: expect.objectContaining({
+            status: 401,
+            method: 'GET',
+            url: 'http://localhost:7878/api/v3/qualityprofile',
+            data: { message: 'Unauthorized' },
+          }),
+        },
+        'Error getting quality profiles from Radarr'
+      );
+    });
+  });
+
+  describe('describeError', () => {
+    it('should not include request headers for axios errors', () => {
+      const result = describeError(makeAxiosError(500, 'boom'));
+
+      expect(JSON.stringify(result)).not.toContain('test-key');
+      expect(result).toMatchObject({ status: 500, code: 'ERR_BAD_REQUEST', data: 'boom' });
+    });
+
+    it('should include message and stack for plain errors', () => {
+      const result = describeError(new Error('Network error'));
+
+      expect(result).toMatchObject({ message: 'Network error', stack: expect.any(String) });
+    });
+
+    it('should stringify non-error values', () => {
+      expect(describeError('oops')).toEqual({ message: 'oops' });
     });
   });
 

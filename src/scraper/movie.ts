@@ -101,12 +101,12 @@ function extractLetterboxdId($: cheerio.CheerioAPI): number {
         const filmUid = postedData.uid.replace(/^film:/, '');
         const filmId = parseInt(filmUid, 10);
         if (!Number.isInteger(filmId)) {
-            logger.error('Extracted Letterboxd ID is not a valid integer.', { filmId });
+            logger.error({ filmId }, 'Extracted Letterboxd ID is not a valid integer.');
             throw new Error('Extracted Letterboxd ID is not a valid integer.');
         }
         return filmId;
     } catch (error) {
-        logger.error('Failed to extract Letterboxd ID from HTML. This could be due to an unexpected HTML structure or missing data.', { error });
+        logger.error({ err: error }, 'Failed to extract Letterboxd ID from HTML. This could be due to an unexpected HTML structure or missing data.');
         throw new Error('Failed to extract Letterboxd ID from HTML.');
     }
 }

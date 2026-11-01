@@ -21,8 +21,13 @@ function startScheduledMonitoring(): void {
 }
 
 async function run() {
-  const movies = await fetchMoviesFromUrl(env.LETTERBOXD_URL);
-  await upsertMovies(movies);
+  try {
+    const movies = await fetchMoviesFromUrl(env.LETTERBOXD_URL);
+    await upsertMovies(movies);
+  } catch (error) {
+    // Log and keep the scheduler alive; the next interval will retry.
+    logger.error({ err: error }, 'Sync run failed');
+  }
 }
 
 export async function main() {
@@ -34,5 +39,5 @@ export { startScheduledMonitoring };
 // Only run main if this file is executed directly
 if (require.main === module) {
   logger.info(`Lettarrboxd version ${process.env.APP_VERSION || 'dev'}`);
-  main().catch(logger.error);
+  main().catch(err => logger.error({ err }, 'Fatal error'));
 }
