@@ -18,13 +18,18 @@ export class ListScraper implements Scraper {
         const allMovieLinks = await this.getAllMovieLinks(processUrl);
         const linksToProcess = typeof this.take === 'number' ? allMovieLinks.slice(0, this.take) : allMovieLinks;
 
-        const movies = await Bluebird.map(linksToProcess, link => {
-            return getMovie(link);
+        const results = await Bluebird.map(linksToProcess, async link => {
+            try {
+                return await getMovie(link);
+            } catch (error) {
+                logger.error(`Failed to scrape movie ${link}, skipping.`, { error });
+                return null;
+            }
         }, {
             concurrency: 10
         });
-        
-        return movies;
+
+        return results.filter((movie): movie is LetterboxdMovie => movie !== null);
     }
 
     private async getAllMovieLinks(baseUrl: string): Promise<string[]> {

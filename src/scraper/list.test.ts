@@ -243,5 +243,39 @@ describe('ListScraper', () => {
       expect(movies).toHaveLength(0);
       expect(movieModule.getMovie).not.toHaveBeenCalled();
     });
+
+    it('should skip movies that fail to scrape instead of failing the whole list', async () => {
+      const mockHtml = `
+        <html>
+          <body>
+            <div class="react-component" data-target-link="/film/movie1/"></div>
+            <div class="react-component" data-target-link="/film/movie2/"></div>
+          </body>
+        </html>
+      `;
+
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        text: async () => mockHtml,
+      });
+
+      const mockMovie2 = {
+        id: 2,
+        name: 'Movie 2',
+        slug: '/film/movie2/',
+        tmdbId: '456',
+        imdbId: 'tt456',
+        publishedYear: 2021,
+      };
+
+      (movieModule.getMovie as jest.Mock)
+        .mockRejectedValueOnce(new Error('Failed to extract Letterboxd ID from HTML.'))
+        .mockResolvedValueOnce(mockMovie2);
+
+      const scraper = new ListScraper('https://letterboxd.com/user/watchlist/');
+      const movies = await scraper.getMovies();
+
+      expect(movies).toEqual([mockMovie2]);
+    });
   });
 });
