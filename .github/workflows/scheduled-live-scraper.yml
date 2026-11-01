@@ -13,6 +13,12 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    services:
+      # Letterboxd sits behind Cloudflare, which challenges requests from CI runners
+      flaresolverr:
+        image: ghcr.io/flaresolverr/flaresolverr:latest
+        ports:
+          - 8191:8191
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -26,8 +32,18 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
+      - name: Wait for FlareSolverr
+        run: |
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:8191/health && exit 0
+            sleep 2
+          done
+          echo "FlareSolverr did not become healthy"
+          exit 1
+
       # Run serially so parallel suites don't burst requests at Letterboxd
       - name: Run live integration tests
         run: yarn test:integration --runInBand
         env:
           CI: true
+          FLARESOLVERR_URL: http://localhost:8191
