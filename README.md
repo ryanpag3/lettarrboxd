@@ -13,6 +13,7 @@ The application supports various types of Letterboxd URLs for the `LETTERBOXD_UR
 - **Watchlists**: `https://letterboxd.com/username/watchlist/`
 - **Regular Lists**: `https://letterboxd.com/username/list/list-name/`
 - **Private List Share Links**: `https://letterboxd.com/username/list/list-name/share/<token>/`
+- **Short Links**: `https://boxd.it/<id>` (including private list share links like `https://boxd.it/<id>$<token>`; in Docker Compose, escape the `$` as `$$`)
 - **Watched Movies**: `https://letterboxd.com/username/films/`
 - **Collections**: `https://letterboxd.com/films/in/collection-name/`
 - **Popular Movies**: `https://letterboxd.com/films/popular/`

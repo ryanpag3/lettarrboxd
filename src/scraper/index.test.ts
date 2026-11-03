@@ -167,6 +167,40 @@ describe('scraper index', () => {
       expect(true).toBe(true);
     });
 
+    it('should resolve boxd.it short links before scraping', async () => {
+      const fetchMock = jest.fn().mockResolvedValue({
+        status: 302,
+        headers: new Headers({
+          location: 'https://letterboxd.com/user/list/my-list/share/AbCdEf123/',
+        }),
+      });
+      global.fetch = fetchMock;
+
+      const mockGetMovies = jest.fn().mockResolvedValue([]);
+      (ListScraper as jest.Mock).mockImplementation(() => ({
+        getMovies: mockGetMovies,
+      }));
+
+      await fetchMoviesFromUrl('https://boxd.it/AbC12$AbCdEf123');
+
+      expect(fetchMock).toHaveBeenCalledWith('https://boxd.it/AbC12$AbCdEf123', {
+        redirect: 'manual',
+      });
+      expect(ListScraper).toHaveBeenCalledWith(
+        'https://letterboxd.com/user/list/my-list/share/AbCdEf123/',
+        undefined,
+        undefined
+      );
+    });
+
+    it('should throw when a short link does not redirect', async () => {
+      global.fetch = jest.fn().mockResolvedValue({ status: 404, headers: new Headers() });
+
+      await expect(fetchMoviesFromUrl('https://boxd.it/nope')).rejects.toThrow(
+        'Could not resolve short link https://boxd.it/nope: 404'
+      );
+    });
+
     it('should throw error for unsupported URL format', async () => {
       await expect(fetchMoviesFromUrl('https://example.com/invalid')).rejects.toThrow(
         'Unsupported URL format: https://example.com/invalid'

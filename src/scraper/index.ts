@@ -2,6 +2,7 @@ import { ListScraper } from './list';
 import { CollectionsScraper } from './collections';
 import { PopularScraper } from './popular';
 import env from '../util/env';
+import logger from '../util/logger';
 
 export interface LetterboxdMovie {
     id: number;
@@ -27,7 +28,6 @@ export const LETTERBOXD_BASE_URL = 'https://letterboxd.com';
 
 const URL_PATTERNS = {
   [ListType.WATCHLIST]: /^https:\/\/letterboxd\.com\/[^\/]+\/watchlist\/?$/,
-  // Optional `share/<token>` suffix supports secret share links to private lists
   [ListType.REGULAR_LIST]: /^https:\/\/letterboxd\.com\/[^\/]+\/list\/[^\/]+(\/share\/[^\/]+)?\/?$/,
   [ListType.WATCHED_MOVIES]: /^https:\/\/letterboxd\.com\/[^\/]+\/films\/?$/,
   [ListType.ACTOR_FILMOGRAPHY]: /^https:\/\/letterboxd\.com\/actor\/[^\/]+\/?$/,
@@ -46,7 +46,33 @@ export const detectListType = (url: string): ListType | null => {
   return null;
 };
 
-export const fetchMoviesFromUrl = async (url: string): Promise<LetterboxdMovie[]> => {
+const SHORT_LINK_PATTERN = /^https?:\/\/boxd\.it\/[^\/]+\/?$/;
+
+/*
+ * Letterboxd's boxd.it short links (e.g. the default share link for a private
+ * list, https://boxd.it/<id>$<token>) 302 to the full letterboxd.com URL.
+ * boxd.it isn't behind a Cloudflare challenge, so a direct request is enough.
+ * Resolved on every run so the link keeps working if the list slug changes.
+ */
+export const resolveShortLink = async (url: string): Promise<string> => {
+  if (!SHORT_LINK_PATTERN.test(url)) {
+    return url;
+  }
+
+  const response = await fetch(url, { redirect: 'manual' });
+  const location = response.headers.get('location');
+
+  if (response.status < 300 || response.status >= 400 || !location) {
+    throw new Error(`Could not resolve short link ${url}: ${response.status}`);
+  }
+
+  const resolved = new URL(location, url).toString();
+  logger.debug(`Resolved short link ${url} to ${resolved}`);
+  return resolved;
+};
+
+export const fetchMoviesFromUrl = async (inputUrl: string): Promise<LetterboxdMovie[]> => {
+  const url = await resolveShortLink(inputUrl);
   const listType = detectListType(url);
   
   if (!listType) {
