@@ -48,12 +48,7 @@ export const detectListType = (url: string): ListType | null => {
 
 const SHORT_LINK_PATTERN = /^https?:\/\/boxd\.it\/[^\/]+\/?$/;
 
-/*
- * Letterboxd's boxd.it short links (e.g. the default share link for a private
- * list, https://boxd.it/<id>$<token>) 302 to the full letterboxd.com URL.
- * boxd.it isn't behind a Cloudflare challenge, so a direct request is enough.
- * Resolved on every run so the link keeps working if the list slug changes.
- */
+
 export const resolveShortLink = async (url: string): Promise<string> => {
   if (!SHORT_LINK_PATTERN.test(url)) {
     return url;
