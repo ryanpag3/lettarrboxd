@@ -12,6 +12,7 @@ The application supports various types of Letterboxd URLs for the `LETTERBOXD_UR
 
 - **Watchlists**: `https://letterboxd.com/username/watchlist/`
 - **Regular Lists**: `https://letterboxd.com/username/list/list-name/`
+- **Private List Share Links**: `https://letterboxd.com/username/list/list-name/share/<token>/`
 - **Watched Movies**: `https://letterboxd.com/username/films/`
 - **Collections**: `https://letterboxd.com/films/in/collection-name/`
 - **Popular Movies**: `https://letterboxd.com/films/popular/`
@@ -49,7 +50,7 @@ LETTERBOXD_URL=https://letterboxd.com/director/christopher-nolan/
 LETTERBOXD_URL=https://letterboxd.com/writer/aaron-sorkin/
 ```
 
-**Note**: All Letterboxd lists must be public for the application to access them.
+**Note**: Letterboxd lists must be public, or private with a share link set to "anyone with the link". Lists shared only with friends require a login and are not supported.
 
 ## Quick Start
 
@@ -295,7 +296,7 @@ If the Release workflow fails, fix the cause and re-run it; no image tags move u
 **Movies not being added**
 - Verify your Radarr API key and URL are correct
 - Check that the quality profile name matches exactly (case-sensitive)
-- Ensure your Letterboxd list is public
+- Ensure your Letterboxd list is public, or use a private list's "anyone with the link" share URL
 
 **Docker container won't start**
 - Verify all required environment variables are set

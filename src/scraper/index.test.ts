@@ -47,6 +47,20 @@ describe('scraper index', () => {
       );
     });
 
+    it('should detect private list share URLs', () => {
+      expect(detectListType('https://letterboxd.com/user/list/my-list/share/AbCdEf123')).toBe(
+        ListType.REGULAR_LIST
+      );
+      expect(detectListType('https://letterboxd.com/user/list/my-list/share/AbCdEf123/')).toBe(
+        ListType.REGULAR_LIST
+      );
+    });
+
+    it('should not treat list edit or bare share URLs as lists', () => {
+      expect(detectListType('https://letterboxd.com/user/list/my-list/edit/')).toBeNull();
+      expect(detectListType('https://letterboxd.com/user/list/my-list/share/')).toBeNull();
+    });
+
     it('should detect watched movies URLs', () => {
       expect(detectListType('https://letterboxd.com/user/films')).toBe(ListType.WATCHED_MOVIES);
       expect(detectListType('https://letterboxd.com/user/films/')).toBe(ListType.WATCHED_MOVIES);
