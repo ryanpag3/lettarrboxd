@@ -2,6 +2,7 @@ import { ListScraper } from './list';
 import { CollectionsScraper } from './collections';
 import { PopularScraper } from './popular';
 import env from '../util/env';
+import logger from '../util/logger';
 
 export interface LetterboxdMovie {
     id: number;
@@ -27,7 +28,7 @@ export const LETTERBOXD_BASE_URL = 'https://letterboxd.com';
 
 const URL_PATTERNS = {
   [ListType.WATCHLIST]: /^https:\/\/letterboxd\.com\/[^\/]+\/watchlist\/?$/,
-  [ListType.REGULAR_LIST]: /^https:\/\/letterboxd\.com\/[^\/]+\/list\/[^\/]+\/?$/,
+  [ListType.REGULAR_LIST]: /^https:\/\/letterboxd\.com\/[^\/]+\/list\/[^\/]+(\/share\/[^\/]+)?\/?$/,
   [ListType.WATCHED_MOVIES]: /^https:\/\/letterboxd\.com\/[^\/]+\/films\/?$/,
   [ListType.ACTOR_FILMOGRAPHY]: /^https:\/\/letterboxd\.com\/actor\/[^\/]+\/?$/,
   [ListType.DIRECTOR_FILMOGRAPHY]: /^https:\/\/letterboxd\.com\/director\/[^\/]+\/?$/,
@@ -45,7 +46,28 @@ export const detectListType = (url: string): ListType | null => {
   return null;
 };
 
-export const fetchMoviesFromUrl = async (url: string): Promise<LetterboxdMovie[]> => {
+const SHORT_LINK_PATTERN = /^https?:\/\/boxd\.it\/[^\/]+\/?$/;
+
+
+export const resolveShortLink = async (url: string): Promise<string> => {
+  if (!SHORT_LINK_PATTERN.test(url)) {
+    return url;
+  }
+
+  const response = await fetch(url, { redirect: 'manual' });
+  const location = response.headers.get('location');
+
+  if (response.status < 300 || response.status >= 400 || !location) {
+    throw new Error(`Could not resolve short link ${url}: ${response.status}`);
+  }
+
+  const resolved = new URL(location, url).toString();
+  logger.debug(`Resolved short link ${url} to ${resolved}`);
+  return resolved;
+};
+
+export const fetchMoviesFromUrl = async (inputUrl: string): Promise<LetterboxdMovie[]> => {
+  const url = await resolveShortLink(inputUrl);
   const listType = detectListType(url);
   
   if (!listType) {
