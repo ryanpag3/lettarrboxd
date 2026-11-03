@@ -1,0 +1,43 @@
+name: Coverage Comment
+
+# Runs in the base repo context so it can comment on PRs from forks.
+# It only reads coverage artifacts as data and never checks out or runs PR code.
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+
+permissions:
+  actions: read
+  contents: read
+  pull-requests: write
+
+jobs:
+  comment:
+    if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: coverage
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build comment
+        id: body
+        run: |
+          PR=$(tr -dc '0-9' < pr-number.txt)
+          [ -n "$PR" ] || { echo "invalid PR number"; exit 1; }
+          echo "pr=$PR" >> "$GITHUB_OUTPUT"
+          {
+            echo "### Coverage"
+            echo
+            echo "| Statements | Branches | Functions | Lines |"
+            echo "|---|---|---|---|"
+            jq -r '.total | "| \(.statements.pct)% | \(.branches.pct)% | \(.functions.pct)% | \(.lines.pct)% |"' coverage-summary.json
+          } > comment.md
+
+      - uses: marocchino/sticky-pull-request-comment@v2.9.0
+        with:
+          number: ${{ steps.body.outputs.pr }}
+          path: comment.md
