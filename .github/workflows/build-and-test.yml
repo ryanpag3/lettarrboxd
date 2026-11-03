@@ -71,10 +71,17 @@ jobs:
           echo ""
           echo "Required Threshold: 85% for all metrics (enforced by jest coverageThreshold)"
 
-      - name: Comment coverage on PR
+      - name: Save PR number
         if: github.event_name == 'pull_request'
-        uses: romeovs/lcov-reporter-action@v0.3.1
+        run: echo "${{ github.event.number }}" > coverage/pr-number.txt
+
+      # Fork PRs get a read-only token, so the comment is posted by
+      # coverage-comment.yml (workflow_run) from these artifacts.
+      - name: Upload coverage for PR comment
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
         with:
-          lcov-file: ./coverage/lcov.info
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          delete-old-comments: true
+          name: coverage
+          path: |
+            coverage/coverage-summary.json
+            coverage/pr-number.txt
